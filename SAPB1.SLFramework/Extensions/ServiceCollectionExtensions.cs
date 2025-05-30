@@ -24,7 +24,7 @@ namespace SAPB1.SLFramework.Extensions
             services.Configure<SapB1Settings>(configuration.GetSection("SapB1"));
 
             // 2. Register SLConnection as singleton using bound settings
-            services.AddSingleton<SLConnection>(sp =>
+            services.AddSingleton(sp =>
             {
                 var opts = sp.GetRequiredService<Microsoft.Extensions.Options.IOptions<SapB1Settings>>().Value;
                 return new SLConnection(
