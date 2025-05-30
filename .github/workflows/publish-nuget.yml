@@ -1,42 +1,40 @@
 name: Publish NuGet Package
 
 on:
-push:
-\# Triggers the workflow on new tags (e.g., v1.0.0)
-tags:
-\- 'v\*.*.*'
+  push:
+    tags:
+      - 'v*.*.*'
 
 jobs:
-publish:
-runs-on: ubuntu-latest
-steps:
-\- name: Checkout repository
-uses: actions/checkout\@v3
+  publish:
+    runs-on: ubuntu-latest
 
-```
-  - name: Setup .NET SDK
-    uses: actions/setup-dotnet@v3
-    with:
-      dotnet-version: '8.0.x'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-  - name: Restore dependencies
-    run: dotnet restore
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '8.0.x'
 
-  - name: Build
-    run: dotnet build --configuration Release --no-restore
+      - name: Restore dependencies
+        run: dotnet restore
 
-  - name: Pack framework library
-    run: |
-      dotnet pack src/SAPB1.SLFramework/SAPB1.SLFramework.csproj \
-        --configuration Release \
-        --output ./nupkg \
-        --no-build
+      - name: Build
+        run: dotnet build --configuration Release --no-restore
 
-  - name: Push package to NuGet
-    env:
-      NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
-    run: |
-      dotnet nuget push "./nupkg/*.nupkg" \
-        --api-key $NUGET_API_KEY \
-        --source https://api.nuget.org/v3/index.json
-```
+      - name: Pack framework library
+        run: |
+          dotnet pack src/SAPB1.SLFramework/SAPB1.SLFramework.csproj \
+            --configuration Release \
+            --output nupkg \
+            --no-build
+
+      - name: Push package to NuGet.org
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+        run: |
+          dotnet nuget push "nupkg/*.nupkg" \
+            --api-key $NUGET_API_KEY \
+            --source https://api.nuget.org/v3/index.json
