@@ -26,7 +26,7 @@ jobs:
 
       - name: Pack framework library
         run: |
-          dotnet pack src/SAPB1.SLFramework/SAPB1.SLFramework.csproj \
+          dotnet pack SAPB1.SLFramework/SAPB1.SLFramework.csproj \
             --configuration Release \
             --output nupkg \
             --no-build
