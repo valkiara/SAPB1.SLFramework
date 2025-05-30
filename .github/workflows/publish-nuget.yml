@@ -26,10 +26,18 @@ jobs:
 
       - name: Pack framework library
         run: |
+          git_tag="${GITHUB_REF##*/}"       # e.g. v1.2.3
+          version="${git_tag#v}"            # strip the leading ‘v’
+
+          echo "📦 Packing version $version"
+
           dotnet pack SAPB1.SLFramework/SAPB1.SLFramework.csproj \
             --configuration Release \
             --output nupkg \
-            --no-build
+            --no-build \
+            /p:Version="$version"
+
+
 
       - name: Push package to NuGet.org
         env:
