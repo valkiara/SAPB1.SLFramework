@@ -8,7 +8,7 @@ namespace SAPB1.SLFramework.Abstractions.Attributes
         /// <summary>
         /// AliasID — e.g. "U_MyField"
         /// </summary>
-        public string FieldID { get; }
+        public string? FieldID { get; }
 
         /// <summary>
         /// User-friendly name — e.g. "My Field"
@@ -67,13 +67,11 @@ namespace SAPB1.SLFramework.Abstractions.Attributes
             = UDFLinkedSystemObjectTypesEnum.ulNone;
 
         public UdfAttribute(
-            string fieldID,
             string name,
             BoFieldTypes type,
             int size,
             string description)
         {
-            FieldID = fieldID;
             Name = name;
             Type = type;
             Size = size;
