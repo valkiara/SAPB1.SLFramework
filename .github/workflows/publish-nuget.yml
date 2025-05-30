@@ -26,18 +26,17 @@ jobs:
 
       - name: Pack framework library
         run: |
-          # Extract the tag name (refs/tags/v1.2.3 → v1.2.3)
-          git_tag="${GITHUB_REF##*/}"
-          # Strip the leading “v” (v1.2.3 → 1.2.3)
-          version="${git_tag#v}"
+          git_tag="${GITHUB_REF##*/}"       # e.g. v1.2.3
+          version="${git_tag#v}"            # strip the leading ‘v’
 
-          echo "Packing version $version from tag $git_tag"
+          echo "📦 Packing version $version"
 
           dotnet pack SAPB1.SLFramework/SAPB1.SLFramework.csproj \
             --configuration Release \
             --output nupkg \
             --no-build \
             /p:Version="$version"
+
 
 
       - name: Push package to NuGet.org
