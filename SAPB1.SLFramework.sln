@@ -1,0 +1,27 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.12.35527.113 d17.12
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{9DE0D374-DD58-4812-A635-7C9DEB17F952}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SAPB1.SLFramework", "SAPB1.SLFramework\SAPB1.SLFramework.csproj", "{77E77770-943F-4E50-99A3-12B0FE74E243}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{77E77770-943F-4E50-99A3-12B0FE74E243}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{77E77770-943F-4E50-99A3-12B0FE74E243}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{77E77770-943F-4E50-99A3-12B0FE74E243}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{77E77770-943F-4E50-99A3-12B0FE74E243}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{77E77770-943F-4E50-99A3-12B0FE74E243} = {9DE0D374-DD58-4812-A635-7C9DEB17F952}
+	EndGlobalSection
+EndGlobal
