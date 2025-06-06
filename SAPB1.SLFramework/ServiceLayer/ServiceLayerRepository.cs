@@ -53,7 +53,7 @@ namespace SAPB1.SLFramework.ServiceLayer
         {
             return await _connection.Request(_resource)
                                      .SetQueryParam("$filter", filter)
-                                     .GetAsync<ODataResult<IEnumerable<T>>>();
+                                     .GetAsync<ODataResult<IEnumerable<T>>>(false);
         }
 
         public ODataResult<IEnumerable<T>> Query(string filter)
@@ -73,7 +73,6 @@ namespace SAPB1.SLFramework.ServiceLayer
 
         public async Task UpdateAsync(object id, string entityJson)
         {
-            await _connection.LoginAsync();
             await _connection.Request(_resource, id)
                              .PatchStringAsync(entityJson);
         }
@@ -101,8 +100,20 @@ namespace SAPB1.SLFramework.ServiceLayer
         private async Task UpdateObjectAsync(object id, T entity)
         {
             // Flurl will serialize 'entity' with System.Text.Json
-            await _connection.Request(_resource, id)
+            if (typeof(T) == typeof(UserFieldsMD))
+            {
+                // id should be "TableName='UDT01',FieldID=0"
+                // We build a full resource: "UserFieldsMD(TableName='UDT01',FieldID=0')"
+                string fullResource = $"{_resource}({id})";
+                await _connection
+                      .Request(fullResource)     // exactly UserFieldsMD(TableName='UDT01',FieldID=0)
+                      .PatchAsync(entity);
+            }
+            else
+            {
+                await _connection.Request(_resource, id)
                              .PatchAsync(entity);
+            }
         }
 
         public void Cancel(object id)
@@ -110,7 +121,6 @@ namespace SAPB1.SLFramework.ServiceLayer
 
         public async Task CancelAsync(object id)
         {
-            await _connection.LoginAsync();
             await _connection.Request(_resource, id)
                              .DeleteAsync();
         }
@@ -118,9 +128,23 @@ namespace SAPB1.SLFramework.ServiceLayer
         public Task LoginAsync()
             => _connection.LoginAsync();
 
-        public Task<bool> ExistsAsync(string tableName, CancellationToken cancellationToken)
+        /// <summary>
+        /// Returns true if any record of type T satisfies the given OData filter.
+        /// </summary>
+        public async Task<bool> ExistsAsync(string odataFilter)
         {
-            throw new NotImplementedException();
+            // 1) Build a request to: /b1s/v1/<Resource>?$filter=<odataFilter>&$top=1
+            //    We only need “any” result, so $top=1 is enough.
+            var response = await _connection
+                                  .Request(_resource)                      // e.g. "UserTablesMD"
+                                  .SetQueryParam("$filter", odataFilter)   // e.g. "TableName eq 'MY_TABLE'"
+                                  .SetQueryParam("$top", "1")
+                                  .SetQueryParam("$count", "true")
+                                  .GetAsync<ODataResult<List<T>>>(false)
+                                  .ConfigureAwait(false);
+
+            // 2) If any value is returned, then “Exists” = true
+            return response.Count > 0;
         }
     }
 }

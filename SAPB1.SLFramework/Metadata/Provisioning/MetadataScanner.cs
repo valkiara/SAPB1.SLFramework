@@ -2,62 +2,90 @@
 using SAPB1.SLFramework.Abstractions.Attributes;
 using SAPB1.SLFramework.Abstractions.Models;
 
-namespace SAPB1.SLFramework.Metadata
+namespace SAPB1.SLFramework.Metadata.Provisioning
 {
     /// <summary>
-    /// Scans assemblies for UDT and UDF attributes to produce metadata definitions.
+    /// Scans assemblies for UDT, UDF, and SapTable attributes to produce metadata definitions.
     /// </summary>
     public static class MetadataScanner
     {
         /// <summary>
         /// Scans loaded assemblies for classes decorated with UdtAttribute
-        /// and returns corresponding UserTableMD definitions.
+        /// and returns corresponding UserTablesMD definitions.
         /// </summary>
         public static IEnumerable<UserTablesMD> ScanUserTables(IServiceProvider serviceProvider)
         {
             var tables = new List<UserTablesMD>();
-            var types = AppDomain.CurrentDomain.GetAssemblies()
-                            .SelectMany(a => a.GetTypes())
-                            .Where(t => t.GetCustomAttribute<UdtAttribute>() != null);
 
-            foreach (var type in types)
+            // Find all types that have [Udt]
+            var typesWithUdt = AppDomain.CurrentDomain.GetAssemblies()
+                                .SelectMany(a => a.GetTypes())
+                                .Where(t => t.GetCustomAttribute<UdtAttribute>() != null);
+
+            foreach (var type in typesWithUdt)
             {
-                var attr = type.GetCustomAttribute<UdtAttribute>();
+                var udtAttr = type.GetCustomAttribute<UdtAttribute>()!;
                 tables.Add(new UserTablesMD
                 {
-                    TableName = attr.TableName,
-                    TableDescription = attr.Description,
-                    TableType = attr.TableType,
-                    Archivable = attr.Archivable,
-                    ArchiveDateField = attr.ArchiveDateField
+                    TableName = "@" + udtAttr.TableName,
+                    TableDescription = udtAttr.Description,
+                    TableType = udtAttr.TableType,
+                    Archivable = udtAttr.Archivable,
+                    ArchiveDateField = udtAttr.ArchiveDateField
                 });
             }
+
             return tables;
         }
 
         /// <summary>
         /// Scans loaded assemblies for properties decorated with UdfAttribute
-        /// and returns corresponding UserFieldMD definitions.
+        /// on types marked with either UdtAttribute (UDT) or SapTableAttribute (system table),
+        /// and returns corresponding UserFieldsMD definitions.
         /// </summary>
-        public static IEnumerable<UserFieldMD> ScanUserFields(IServiceProvider serviceProvider)
+        public static IEnumerable<UserFieldsMD> ScanUserFields(IServiceProvider serviceProvider)
         {
-            var fields = new List<UserFieldMD>();
+            var fields = new List<UserFieldsMD>();
+
+            // Grab all types that have either [Udt] or [SapTable]
             var types = AppDomain.CurrentDomain.GetAssemblies()
-                            .SelectMany(a => a.GetTypes())
-                            .Where(t => t.GetCustomAttribute<UdtAttribute>() != null);
+                             .SelectMany(a => a.GetTypes())
+                             .Where(t => t.GetCustomAttribute<UdtAttribute>() != null
+                                      || t.GetCustomAttribute<SapTableAttribute>() != null);
 
             foreach (var type in types)
             {
+                // If the class has [Udt], that takes precedence.
                 var udtAttr = type.GetCustomAttribute<UdtAttribute>();
-                var props = type.GetProperties()
-                                .Where(p => p.GetCustomAttribute<UdfAttribute>() != null);
+                // Otherwise, if it has [SapTable], we use that
+                var sapAttr = type.GetCustomAttribute<SapTableAttribute>();
 
-                foreach (var prop in props)
+                // Determine which TableName to use:
+                string tableName;
+                if (udtAttr != null)
                 {
-                    var udfAttr = prop.GetCustomAttribute<UdfAttribute>();
-                    fields.Add(new UserFieldMD
+                    tableName = "@" + udtAttr.TableName;
+                }
+                else
+                {
+                    // sapAttr is guaranteed non‐null here (by the Where() above)
+                    tableName = sapAttr!.TableName;
+                }
+
+                // Now find all properties on this type that have [Udf]
+                var udfProps = type.GetProperties()
+                                   .Where(p => p.GetCustomAttribute<UdfAttribute>() != null);
+
+                foreach (var prop in udfProps)
+                {
+                    var udfAttr = prop.GetCustomAttribute<UdfAttribute>()!;
+
+                    fields.Add(new UserFieldsMD
                     {
-                        TableName = udtAttr.TableName,
+                        // Use the system table name or UDT name from above
+                        TableName = tableName,
+
+                        // Copy over all the Udf‐specific metadata
                         FieldID = udfAttr.FieldID,
                         Name = udfAttr.Name,
                         Type = udfAttr.Type,
@@ -74,6 +102,7 @@ namespace SAPB1.SLFramework.Metadata
                     });
                 }
             }
+
             return fields;
         }
     }

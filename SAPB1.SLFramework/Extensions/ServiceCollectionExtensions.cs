@@ -2,10 +2,9 @@
 using Microsoft.Extensions.DependencyInjection;
 using B1SLayer;
 using SAPB1.SLFramework.Abstractions.Interfaces;
-using SAPB1.SLFramework.Metadata;
 using SAPB1.SLFramework.Metadata.Services;
-using SAPB1.SLFramework.ServiceLayer;
 using SAPB1.SLFramework.Metadata.Provisioning;
+using SAPB1.SLFramework.ServiceLayer;
 using SAPB1.SLFramework.Settings;
 
 namespace SAPB1.SLFramework.Extensions
@@ -36,8 +35,8 @@ namespace SAPB1.SLFramework.Extensions
                     opts.NumberOfAttempts);
             });
 
-            // 3. Expose connection via interface
-            services.AddSingleton(sp => sp.GetRequiredService<SLConnection>());
+            // 3. (Removed) Exposing SLConnection via GetRequiredService<SLConnection>() created a circular loop.
+            //    You can inject SLConnection directly in your repositories or provisioner.
 
             // 4. Register generic ServiceLayerRepository<T>
             services.AddTransient(typeof(IServiceLayerRepository<>), typeof(ServiceLayerRepository<>));

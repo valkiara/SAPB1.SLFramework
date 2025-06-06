@@ -10,14 +10,14 @@ namespace SAPB1.SLFramework.Metadata.Provisioning
     public class MetadataProvisioner : IMetadataProvisioner
     {
         private readonly IServiceLayerRepository<UserTablesMD> _tableRepo;
-        private readonly IServiceLayerRepository<UserFieldMD> _fieldRepo;
+        private readonly IServiceLayerRepository<UserFieldsMD> _fieldRepo;
         private readonly IEnumerable<UserTablesMD> _tables;
-        private readonly IEnumerable<UserFieldMD> _fields;
+        private readonly IEnumerable<UserFieldsMD> _fields;
         public MetadataProvisioner(
             IServiceLayerRepository<UserTablesMD> tableRepo,
-            IServiceLayerRepository<UserFieldMD> fieldRepo,
+            IServiceLayerRepository<UserFieldsMD> fieldRepo,
             IEnumerable<UserTablesMD> tables,
-            IEnumerable<UserFieldMD> fields)
+            IEnumerable<UserFieldsMD> fields)
         {
             _tableRepo = tableRepo ?? throw new ArgumentNullException(nameof(tableRepo));
             _fieldRepo = fieldRepo ?? throw new ArgumentNullException(nameof(fieldRepo));
@@ -34,30 +34,30 @@ namespace SAPB1.SLFramework.Metadata.Provisioning
             foreach (var udt in _tables)
             {
                 // use primary key of UDT is TableName
-                var exists = await _tableRepo.ExistsAsync(udt.TableName, cancellationToken);
+                var exists = await _tableRepo.ExistsAsync($"TableName eq '{udt.CleanTableName}'");
                 if (!exists)
                 {
                     await _tableRepo.AddAsync(udt);
                 }
                 else
                 {
-                    await _tableRepo.UpdateAsync(udt.TableName, udt);
+                    await _tableRepo.UpdateAsync(udt.CleanTableName, udt);
                 }
             }
 
             // Provision UDFs next
             foreach (var udf in _fields)
             {
-                // composite key: TableName + ',' + FieldID (encoded by OData parentheses)
-                var key = $"{udf.TableName}(AliasID='{udf.FieldID}')";
-                var exists = await _fieldRepo.ExistsAsync(key, cancellationToken);
+                var exists = await _fieldRepo.ExistsAsync($"TableName eq '{udf.TableName}' and Name eq '{udf.Name}'");
                 if (!exists)
                 {
                     await _fieldRepo.AddAsync(udf);
                 }
                 else
                 {
-                    await _fieldRepo.UpdateAsync(key, udf);
+                    var existingField = await _fieldRepo.QueryAsync($"TableName eq '{udf.TableName}' and Name eq '{udf.Name}'");
+                    string fieldKey = $"TableName='{existingField.Value.First().TableName}',FieldID={existingField.Value.First().FieldID}";
+                    await _fieldRepo.UpdateAsync(fieldKey, udf);
                 }
             }
         }

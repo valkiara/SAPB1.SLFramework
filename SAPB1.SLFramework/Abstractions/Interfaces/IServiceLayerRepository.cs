@@ -38,7 +38,16 @@ namespace SAPB1.SLFramework.Abstractions.Interfaces
 
         // Session management
         Task LoginAsync();
-        Task<bool> ExistsAsync(string tableName, CancellationToken cancellationToken);
+        /// <summary>
+        /// Returns true if any T matches the given OData filter expression.
+        /// For example:
+        ///   For UDTs:     filter = $"TableName eq '{tableName}'"
+        ///   For UDFs:     filter = $"TableName eq '{tableName}' and Name eq '{fieldName}'"
+        ///   For BPs:      filter = $"CardCode eq '{cardCode}'"
+        ///   For Orders:   filter = $"DocEntry eq {docEntry}"
+        ///   Or any custom OData filter you need.
+        /// </summary>
+        Task<bool> ExistsAsync(string odataFilter);
         void Update(object id, T entity);
         Task UpdateAsync(object id, T entity);
     }
