@@ -27,7 +27,7 @@ namespace SAPB1.SLFramework.Metadata.Provisioning
                 var udtAttr = type.GetCustomAttribute<UdtAttribute>()!;
                 tables.Add(new UserTablesMD
                 {
-                    TableName = "@" + udtAttr.TableName,
+                    TableName = udtAttr.TableName,
                     TableDescription = udtAttr.Description,
                     TableType = udtAttr.TableType,
                     Archivable = udtAttr.Archivable,
@@ -64,7 +64,7 @@ namespace SAPB1.SLFramework.Metadata.Provisioning
                 string tableName;
                 if (udtAttr != null)
                 {
-                    tableName = "@" + udtAttr.TableName;
+                    tableName = $"@{udtAttr.TableName}";
                 }
                 else
                 {

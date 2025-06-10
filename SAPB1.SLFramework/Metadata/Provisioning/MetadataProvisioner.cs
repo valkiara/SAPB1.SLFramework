@@ -1,4 +1,5 @@
-﻿using SAPB1.SLFramework.Abstractions.Interfaces;
+﻿using Newtonsoft.Json;
+using SAPB1.SLFramework.Abstractions.Interfaces;
 using SAPB1.SLFramework.Abstractions.Models;
 
 namespace SAPB1.SLFramework.Metadata.Provisioning
@@ -34,14 +35,14 @@ namespace SAPB1.SLFramework.Metadata.Provisioning
             foreach (var udt in _tables)
             {
                 // use primary key of UDT is TableName
-                var exists = await _tableRepo.ExistsAsync($"TableName eq '{udt.CleanTableName}'");
+                var exists = await _tableRepo.ExistsAsync($"TableName eq '{udt.TableName}'");
                 if (!exists)
                 {
                     await _tableRepo.AddAsync(udt);
                 }
                 else
                 {
-                    await _tableRepo.UpdateAsync(udt.CleanTableName, udt);
+                    await _tableRepo.UpdateAsync(udt.TableName, udt);
                 }
             }
 
