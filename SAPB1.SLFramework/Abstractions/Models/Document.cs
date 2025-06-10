@@ -24,7 +24,10 @@ namespace SAPB1.SLFramework.Abstractions.Models
         /// </summary>
         public BoStatus DocumentStatus { get; set; }
 
-
+        /// <summary>
+        /// Sets or returns the business place ID assigned to a marketing document (such as, invoice).
+        /// </summary>
+        public int? BPL_IDAssignedToInvoice { get; set; }
 
         /// <summary>
         /// Sets or returns the customer or vendor code.
