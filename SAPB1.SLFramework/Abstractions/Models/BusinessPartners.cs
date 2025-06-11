@@ -4,7 +4,7 @@ namespace SAPB1.SLFramework.Abstractions.Models
 {
     public class BusinessPartners
     {
-        public required string CardCode { get; set; }
+        public string? CardCode { get; set; }
         public required string CardName { get; set; }
         public BoCardTypes CardType { get; set; }
         public required string FederalTaxID { get; set; }
