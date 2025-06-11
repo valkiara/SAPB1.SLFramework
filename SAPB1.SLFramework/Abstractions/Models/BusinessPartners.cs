@@ -2,7 +2,7 @@
 
 namespace SAPB1.SLFramework.Abstractions.Models
 {
-    public class BusinessPartner
+    public class BusinessPartners
     {
         public required string CardCode { get; set; }
         public required string CardName { get; set; }
