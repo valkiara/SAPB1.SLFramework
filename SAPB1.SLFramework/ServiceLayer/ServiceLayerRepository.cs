@@ -1,7 +1,9 @@
 ﻿using B1SLayer;
+using SAPB1.SLFramework.Abstractions.Attributes;
 using SAPB1.SLFramework.Abstractions.Interfaces;
 using SAPB1.SLFramework.Abstractions.Models;
 using SAPB1.SLFramework.Extensions;
+using System.Reflection;
 
 namespace SAPB1.SLFramework.ServiceLayer
 {
@@ -17,7 +19,10 @@ namespace SAPB1.SLFramework.ServiceLayer
         public ServiceLayerRepository(SLConnection connection)
         {
             _connection = connection ?? throw new ArgumentNullException(nameof(connection));
-            _resource = typeof(T).Name;
+
+            // Use [ServiceLayerResourcePath] if available, fallback to typeof(T).Name
+            var attr = typeof(T).GetCustomAttribute<ServiceLayerResourcePathAttribute>();
+            _resource = attr?.ResourcePath ?? typeof(T).Name;
         }
 
         public async Task<T> AddAsync(T entity)
@@ -146,5 +151,65 @@ namespace SAPB1.SLFramework.ServiceLayer
             // 2) If any value is returned, then “Exists” = true
             return response.Count > 0;
         }
+
+
+        public async Task<T?> FirstOrDefaultAsync(string filter)
+        {
+            var result = await _connection.Request(_resource)
+                                          .SetQueryParam("$filter", filter)
+                                          .SetQueryParam("$top", "1")
+                                          .GetAsync<ODataResult<List<T>>>(false)
+                                          .ConfigureAwait(false);
+
+            return result.Value?.FirstOrDefault();
+        }
+
+        public T? FirstOrDefault(string filter)
+            => FirstOrDefaultAsync(filter).GetAwaiter().GetResult();
+
+
+        public async Task<T> FirstAsync(string filter)
+        {
+            var entity = await FirstOrDefaultAsync(filter);
+            return entity ?? throw new InvalidOperationException($"No elements match the filter: {filter}");
+        }
+
+        public T First(string filter)
+            => FirstAsync(filter).GetAwaiter().GetResult();
+
+
+        public async Task<T?> SingleOrDefaultAsync(string filter)
+        {
+            var result = await _connection.Request(_resource)
+                                          .SetQueryParam("$filter", filter)
+                                          .SetQueryParam("$top", "2") // to check for more than one
+                                          .GetAsync<ODataResult<List<T>>>(false)
+                                          .ConfigureAwait(false);
+
+            var list = result.Value;
+            if (list == null || list.Count == 0)
+                return null;
+
+            if (list.Count > 1)
+                throw new InvalidOperationException($"More than one element matches the filter: {filter}");
+
+            return list.First();
+        }
+
+        public T? SingleOrDefault(string filter)
+            => SingleOrDefaultAsync(filter).GetAwaiter().GetResult();
+
+
+        public async Task<T> SingleAsync(string filter)
+        {
+            var entity = await SingleOrDefaultAsync(filter);
+            return entity ?? throw new InvalidOperationException($"No elements match the filter: {filter}");
+        }
+
+        public T Single(string filter)
+            => SingleAsync(filter).GetAwaiter().GetResult();
+
+
+
     }
 }

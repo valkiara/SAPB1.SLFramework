@@ -50,5 +50,13 @@ namespace SAPB1.SLFramework.Abstractions.Interfaces
         Task<bool> ExistsAsync(string odataFilter);
         void Update(object id, T entity);
         Task UpdateAsync(object id, T entity);
+        Task<T?> FirstOrDefaultAsync(string filter);
+        T? FirstOrDefault(string filter);
+        Task<T> FirstAsync(string filter);
+        T First(string filter);
+        Task<T?> SingleOrDefaultAsync(string filter);
+        T? SingleOrDefault(string filter);
+        Task<T> SingleAsync(string filter);
+        T Single(string filter);
     }
 }
