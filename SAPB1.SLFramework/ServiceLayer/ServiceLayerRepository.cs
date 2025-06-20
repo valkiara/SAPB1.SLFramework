@@ -48,7 +48,7 @@ namespace SAPB1.SLFramework.ServiceLayer
             if (query != null && query.Any())
                 req = req.SetQueryParams(query);    
 
-            return await req.GetAsync<ODataResult<IEnumerable<T>>>();
+            return await req.GetAsync<ODataResult<IEnumerable<T>>>(false);
         }
 
         public ODataResult<IEnumerable<T>> GetAll(IDictionary<string, string>? query = null)

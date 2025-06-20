@@ -1,4 +1,5 @@
 ﻿using SAPB1.SLFramework.Enums;
+using System.Collections.ObjectModel;
 
 namespace SAPB1.SLFramework.Abstractions.Models
 {
@@ -12,14 +13,28 @@ namespace SAPB1.SLFramework.Abstractions.Models
         public string? IBAN { get; set; }
         public string? DefaultBankCode { get; set; }
         public string? EmailAddress { get; set; }
+        public string? DownPaymentClearAct { get; set; }
 
         public IList<BPBankAccount> BPBankAccounts { get; set; }
+
+        public IList<BPAccountReceivablePayble> BPAccountReceivablePaybleCollection { get; set; }
 
         public BusinessPartners()
         {
             BPBankAccounts = [];
         }
     }
+
+
+    public class BPAccountReceivablePayble
+    {
+        public BoBpAccountTypes? AccountType { get; set; }
+
+        public string? AccountCode { get; set; }
+
+        public string? BPCode { get; set; }
+    }
+
 
     public class BPBankAccount
     {
