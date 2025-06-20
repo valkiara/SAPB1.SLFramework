@@ -98,7 +98,13 @@ namespace SAPB1.SLFramework.Metadata.Provisioning
                         EditSize = udfAttr.EditSize,
                         LinkedUDO = udfAttr.LinkedUDO,
                         LinkedSystemObject = udfAttr.LinkedSystemObject,
-                        ValidValuesMD = Array.Empty<ValidValueMD>()
+                        ValidValuesMD = prop.GetCustomAttributes<ValidValueAttribute>()
+                            .Select(v => new ValidValueMD
+                            {
+                                Value = v.Value,
+                                Description = v.Description
+                            })
+                            .ToArray()
                     });
                 }
             }
