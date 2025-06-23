@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using SAPB1.SLFramework.Abstractions.Interfaces;
+﻿using SAPB1.SLFramework.Abstractions.Interfaces;
 using SAPB1.SLFramework.Abstractions.Models;
 
 namespace SAPB1.SLFramework.Metadata.Provisioning
@@ -56,8 +55,8 @@ namespace SAPB1.SLFramework.Metadata.Provisioning
                 }
                 else
                 {
-                    var existingField = await _fieldRepo.QueryAsync($"TableName eq '{udf.TableName}' and Name eq '{udf.Name}'");
-                    string fieldKey = $"TableName='{existingField.Value.First().TableName}',FieldID={existingField.Value.First().FieldID}";
+                    var existingField = await _fieldRepo.FirstAsync(x => x.TableName == udf.TableName && x.Name == udf.Name);
+                    string fieldKey = $"TableName='{existingField.TableName}',FieldID={existingField.FieldID}";
                     await _fieldRepo.UpdateAsync(fieldKey, udf);
                 }
             }

@@ -44,16 +44,6 @@ namespace SAPB1.SLFramework.ServiceLayer
         public T? Get(object id)
             => GetAsync(id).GetAwaiter().GetResult();
 
-        public async Task<ODataResult<IEnumerable<T>>> QueryAsync(string filter)
-        {
-            return await _connection.Request(_resource)
-                                     .SetQueryParam("$filter", filter)
-                                     .GetAsync<ODataResult<IEnumerable<T>>>(false);
-        }
-
-        public ODataResult<IEnumerable<T>> Query(string filter)
-            => QueryAsync(filter).GetAwaiter().GetResult();
-
         public void Update(object id, string entityJson)
             => UpdateAsync(id, entityJson).GetAwaiter().GetResult();
 

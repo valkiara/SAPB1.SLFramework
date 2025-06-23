@@ -17,10 +17,6 @@ namespace SAPB1.SLFramework.Abstractions.Interfaces
         Task<T?> GetAsync(object id);
         T? Get(object id);
 
-        // Query with custom OData filter
-        Task<ODataResult<IEnumerable<T>>> QueryAsync(string query = "");
-        ODataResult<IEnumerable<T>> Query(string query = "");
-
 
         // Update
         void Update(object id, string entityJson);
