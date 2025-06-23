@@ -2,24 +2,31 @@ using B1SLayer;
 using SAPB1.SLFramework.Abstractions.Interfaces;
 using SAPB1.SLFramework.Abstractions.Models;
 using SAPB1.SLFramework.ServiceLayer;
+using SAPB1.SLFramework.Utilities;
+using System.Linq.Expressions;
 
 namespace SAPb1.SLFramework.Tests
 {
     public class ServiceLayerRepositoryTests
     {
-        public IServiceLayerRepository<UserTablesMD> ServiceLayerRepository { get; set; }
+        public IServiceLayerRepository<BusinessPartners> ServiceLayerRepository { get; set; }
 
         public ServiceLayerRepositoryTests()
         {
-            ServiceLayerRepository = new ServiceLayerRepository<UserTablesMD>(
-                new SLConnection("https://localhost:50000/b1s/v2/", "Test", "manager", "Aa123456!"));
+            ServiceLayerRepository = new ServiceLayerRepository<BusinessPartners>(
+                new SLConnection("https://10.132.10.103:50000/b1s/v2/", "BATUMI_RIVIERA_TEST", "manager", "Aa123456!"));
         }
 
         [Fact]
-        public async void Test1()
+        public async Task WhereAsync_ShouldReturnFilteredResults()
         {
-            var result = await ServiceLayerRepository.ExistsAsync("TableName eq 'RSM_BTXV'");
-            Assert.True(result);
+            // Act
+            var result = await ServiceLayerRepository.QueryAsync(
+                filter: x => x.CardCode == "BPS0253",
+                select: x => new BusinessPartners() { CardCode = x.CardCode, CardName = x.CardName });
+
+            // Assert
+            Assert.NotNull(result);
         }
     }
 }

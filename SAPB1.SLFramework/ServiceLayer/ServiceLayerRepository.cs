@@ -3,6 +3,8 @@ using SAPB1.SLFramework.Abstractions.Attributes;
 using SAPB1.SLFramework.Abstractions.Interfaces;
 using SAPB1.SLFramework.Abstractions.Models;
 using SAPB1.SLFramework.Extensions;
+using SAPB1.SLFramework.Utilities;
+using System.Linq.Expressions;
 using System.Reflection;
 
 namespace SAPB1.SLFramework.ServiceLayer
@@ -42,18 +44,6 @@ namespace SAPB1.SLFramework.ServiceLayer
         public T? Get(object id)
             => GetAsync(id).GetAwaiter().GetResult();
 
-        public async Task<ODataResult<IEnumerable<T>>> GetAllAsync(IDictionary<string, string>? query = null)
-        {
-            var req = _connection.Request(_resource);
-            if (query != null && query.Any())
-                req = req.SetQueryParams(query);    
-
-            return await req.GetAsync<ODataResult<IEnumerable<T>>>(false);
-        }
-
-        public ODataResult<IEnumerable<T>> GetAll(IDictionary<string, string>? query = null)
-            => GetAllAsync(query).GetAwaiter().GetResult();
-
         public async Task<ODataResult<IEnumerable<T>>> QueryAsync(string filter)
         {
             return await _connection.Request(_resource)
@@ -63,15 +53,6 @@ namespace SAPB1.SLFramework.ServiceLayer
 
         public ODataResult<IEnumerable<T>> Query(string filter)
             => QueryAsync(filter).GetAwaiter().GetResult();
-
-        public async Task<long> GetCountAsync(IDictionary<string, string> query)
-        {
-            var result = await GetAllAsync(query);
-            return (long)result.Count!;
-        }
-
-        public long GetCount(IDictionary<string, string> query)
-            => GetCountAsync(query).GetAwaiter().GetResult();
 
         public void Update(object id, string entityJson)
             => UpdateAsync(id, entityJson).GetAwaiter().GetResult();
@@ -136,27 +117,26 @@ namespace SAPB1.SLFramework.ServiceLayer
         /// <summary>
         /// Returns true if any record of type T satisfies the given OData filter.
         /// </summary>
-        public async Task<bool> ExistsAsync(string odataFilter)
+        public async Task<bool> ExistsAsync(Expression<Func<T, bool>> filter)
         {
-            // 1) Build a request to: /b1s/v1/<Resource>?$filter=<odataFilter>&$top=1
-            //    We only need “any” result, so $top=1 is enough.
-            var response = await _connection
-                                  .Request(_resource)                      // e.g. "UserTablesMD"
-                                  .SetQueryParam("$filter", odataFilter)   // e.g. "TableName eq 'MY_TABLE'"
-                                  .SetQueryParam("$top", "1")
-                                  .SetQueryParam("$count", "true")
-                                  .GetAsync<ODataResult<List<T>>>(false)
-                                  .ConfigureAwait(false);
+            var filterStr = ODataFilterBuilder.ToODataFilter(filter);
 
-            // 2) If any value is returned, then “Exists” = true
+            var response = await _connection
+                                 .Request(_resource)
+                                 .SetQueryParam("$filter", filterStr)
+                                 .SetQueryParam("$top", "1")
+                                 .SetQueryParam("$count", "true")
+                                 .GetAsync<ODataResult<List<T>>>(false)
+                                 .ConfigureAwait(false);
+
             return response.Count > 0;
         }
 
-
-        public async Task<T?> FirstOrDefaultAsync(string filter)
+        public async Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>> filter)
         {
+            var filterStr = ODataFilterBuilder.ToODataFilter(filter);
             var result = await _connection.Request(_resource)
-                                          .SetQueryParam("$filter", filter)
+                                          .SetQueryParam("$filter", filterStr)
                                           .SetQueryParam("$top", "1")
                                           .GetAsync<ODataResult<List<T>>>(false)
                                           .ConfigureAwait(false);
@@ -164,25 +144,24 @@ namespace SAPB1.SLFramework.ServiceLayer
             return result.Value?.FirstOrDefault();
         }
 
-        public T? FirstOrDefault(string filter)
+        public T? FirstOrDefault(Expression<Func<T, bool>> filter)
             => FirstOrDefaultAsync(filter).GetAwaiter().GetResult();
 
-
-        public async Task<T> FirstAsync(string filter)
+        public async Task<T> FirstAsync(Expression<Func<T, bool>> filter)
         {
             var entity = await FirstOrDefaultAsync(filter);
-            return entity ?? throw new InvalidOperationException($"No elements match the filter: {filter}");
+            return entity ?? throw new InvalidOperationException($"No elements match the filter.");
         }
 
-        public T First(string filter)
+        public T First(Expression<Func<T, bool>> filter)
             => FirstAsync(filter).GetAwaiter().GetResult();
 
-
-        public async Task<T?> SingleOrDefaultAsync(string filter)
+        public async Task<T?> SingleOrDefaultAsync(Expression<Func<T, bool>> filter)
         {
+            var filterStr = ODataFilterBuilder.ToODataFilter(filter);
             var result = await _connection.Request(_resource)
-                                          .SetQueryParam("$filter", filter)
-                                          .SetQueryParam("$top", "2") // to check for more than one
+                                          .SetQueryParam("$filter", filterStr)
+                                          .SetQueryParam("$top", "2")
                                           .GetAsync<ODataResult<List<T>>>(false)
                                           .ConfigureAwait(false);
 
@@ -191,25 +170,89 @@ namespace SAPB1.SLFramework.ServiceLayer
                 return null;
 
             if (list.Count > 1)
-                throw new InvalidOperationException($"More than one element matches the filter: {filter}");
+                throw new InvalidOperationException($"More than one element matches the filter.");
 
             return list.First();
         }
 
-        public T? SingleOrDefault(string filter)
+        public T? SingleOrDefault(Expression<Func<T, bool>> filter)
             => SingleOrDefaultAsync(filter).GetAwaiter().GetResult();
 
-
-        public async Task<T> SingleAsync(string filter)
+        public async Task<T> SingleAsync(Expression<Func<T, bool>> filter)
         {
             var entity = await SingleOrDefaultAsync(filter);
-            return entity ?? throw new InvalidOperationException($"No elements match the filter: {filter}");
+            return entity ?? throw new InvalidOperationException($"No elements match the filter.");
         }
 
-        public T Single(string filter)
+        public T Single(Expression<Func<T, bool>> filter)
             => SingleAsync(filter).GetAwaiter().GetResult();
 
 
+        public async Task<IEnumerable<T>> SelectAsync(Expression<Func<T, T>> selector)
+        {
+            var selectFields = ODataSelectBuilder.ToODataSelect(selector);
 
+            var result = await _connection.Request(_resource)
+                                          .SetQueryParam("$select", selectFields)
+                                          .GetAsync<ODataResult<IEnumerable<T>>>(false);
+
+            return result.Value ?? Enumerable.Empty<T>();
+        }
+
+        public async Task<IEnumerable<T>> QueryAsync(
+         Expression<Func<T, bool>>? filter = null,
+         Expression<Func<T, T>>? select = null,
+         IEnumerable<(Expression<Func<T, object>> expr, bool desc)>? orderBy = null,
+         int? page = null,
+         int? pageSize = null)
+            {
+            var request = _connection.Request(_resource);
+
+            if (filter is not null)
+            {
+                var filterStr = ODataFilterBuilder.ToODataFilter(filter);
+                request = request.SetQueryParam("$filter", filterStr);
+            }
+
+            if (select is not null)
+            {
+                var selectStr = ODataSelectBuilder.ToODataSelect(select);
+                request = request.SetQueryParam("$select", selectStr);
+            }
+
+            if (orderBy is not null && orderBy.Any())
+            {
+                var orderByStr = ODataOrderByBuilder.ToODataOrderBy(orderBy);
+                request = request.SetQueryParam("$orderby", orderByStr);
+            }
+
+            if (page.HasValue && pageSize.HasValue)
+            {
+                request = request.SetQueryParam("$top", pageSize.Value.ToString());
+                request = request.SetQueryParam("$skip", ((page.Value - 1) * pageSize.Value).ToString());
+            }
+            else if (pageSize.HasValue)
+            {
+                request = request.SetQueryParam("$top", pageSize.Value.ToString());
+            }
+
+            var result = await request.GetAsync<ODataResult<IEnumerable<T>>>(false);
+            return result.Value?.Select(select?.Compile() ?? (x => (T)(object)x)) ?? Enumerable.Empty<T>();
+        }
+
+
+        public async Task<long> CountAsync(Expression<Func<T, bool>>? filter = null)
+        {
+            var request = _connection.Request(_resource).SetQueryParam("$count", "true");
+
+            if (filter is not null)
+            {
+                var filterStr = ODataFilterBuilder.ToODataFilter(filter);
+                request = request.SetQueryParam("$filter", filterStr);
+            }
+
+            var result = await request.GetAsync<ODataResult<IEnumerable<T>>>(false);
+            return result.Count ?? 0;
+        }
     }
 }

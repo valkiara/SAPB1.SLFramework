@@ -6,22 +6,21 @@ namespace SAPB1.SLFramework.Abstractions.Models
     public class BusinessPartners
     {
         public string? CardCode { get; set; }
-        public required string CardName { get; set; }
-        public BoCardTypes CardType { get; set; }
-        public required string FederalTaxID { get; set; }
+        public string? CardName { get; set; }
+        public BoCardTypes? CardType { get; set; }
+        public string? FederalTaxID { get; set; }
         public string? Phone1 { get; set; }
         public string? IBAN { get; set; }
         public string? DefaultBankCode { get; set; }
         public string? EmailAddress { get; set; }
         public string? DownPaymentClearAct { get; set; }
 
-        public IList<BPBankAccount> BPBankAccounts { get; set; }
+        public IList<BPBankAccount>? BPBankAccounts { get; set; }
 
-        public IList<BPAccountReceivablePayble> BPAccountReceivablePaybleCollection { get; set; }
+        public IList<BPAccountReceivablePayble>? BPAccountReceivablePaybleCollection { get; set; }
 
         public BusinessPartners()
         {
-            BPBankAccounts = [];
         }
     }
 

@@ -1,4 +1,5 @@
 ﻿using SAPB1.SLFramework.Abstractions.Models;
+using System.Linq.Expressions;
 
 namespace SAPB1.SLFramework.Abstractions.Interfaces
 {
@@ -16,17 +17,10 @@ namespace SAPB1.SLFramework.Abstractions.Interfaces
         Task<T?> GetAsync(object id);
         T? Get(object id);
 
-        // Read multiple
-        Task<ODataResult<IEnumerable<T>>> GetAllAsync(IDictionary<string, string>? query = null);
-        ODataResult<IEnumerable<T>> GetAll(IDictionary<string, string>? query = null);
-
         // Query with custom OData filter
         Task<ODataResult<IEnumerable<T>>> QueryAsync(string query = "");
         ODataResult<IEnumerable<T>> Query(string query = "");
 
-        // Count entities matching filter
-        Task<long> GetCountAsync(IDictionary<string, string> query);
-        long GetCount(IDictionary<string, string> query);
 
         // Update
         void Update(object id, string entityJson);
@@ -47,16 +41,25 @@ namespace SAPB1.SLFramework.Abstractions.Interfaces
         ///   For Orders:   filter = $"DocEntry eq {docEntry}"
         ///   Or any custom OData filter you need.
         /// </summary>
-        Task<bool> ExistsAsync(string odataFilter);
+        public Task<bool> ExistsAsync(Expression<Func<T, bool>> filter);
         void Update(object id, T entity);
         Task UpdateAsync(object id, T entity);
-        Task<T?> FirstOrDefaultAsync(string filter);
-        T? FirstOrDefault(string filter);
-        Task<T> FirstAsync(string filter);
-        T First(string filter);
-        Task<T?> SingleOrDefaultAsync(string filter);
-        T? SingleOrDefault(string filter);
-        Task<T> SingleAsync(string filter);
-        T Single(string filter);
+        Task<IEnumerable<T>> SelectAsync(Expression<Func<T, T>> selector);
+        public Task<IEnumerable<T>> QueryAsync(
+         Expression<Func<T, bool>>? filter = null,
+         Expression<Func<T, T>>? select = null,
+         IEnumerable<(Expression<Func<T, object>> expr, bool desc)>? orderBy = null,
+         int? page = null,
+         int? pageSize = null);
+
+        Task<long> CountAsync(Expression<Func<T, bool>>? filter = null);
+        Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>> filter);
+        T? FirstOrDefault(Expression<Func<T, bool>> filter);
+        Task<T> FirstAsync(Expression<Func<T, bool>> filter);
+        T First(Expression<Func<T, bool>> filter);
+        Task<T?> SingleOrDefaultAsync(Expression<Func<T, bool>> filter);
+        T? SingleOrDefault(Expression<Func<T, bool>> filter);
+        Task<T> SingleAsync(Expression<Func<T, bool>> filter);
+        T Single(Expression<Func<T, bool>> filter);
     }
 }

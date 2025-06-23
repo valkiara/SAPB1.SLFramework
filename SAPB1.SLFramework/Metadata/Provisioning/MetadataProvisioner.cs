@@ -35,7 +35,7 @@ namespace SAPB1.SLFramework.Metadata.Provisioning
             foreach (var udt in _tables)
             {
                 // use primary key of UDT is TableName
-                var exists = await _tableRepo.ExistsAsync($"TableName eq '{udt.TableName}'");
+                var exists = await _tableRepo.ExistsAsync(x => x.TableName == udt.TableName);
                 if (!exists)
                 {
                     await _tableRepo.AddAsync(udt);
@@ -49,7 +49,7 @@ namespace SAPB1.SLFramework.Metadata.Provisioning
             // Provision UDFs next
             foreach (var udf in _fields)
             {
-                var exists = await _fieldRepo.ExistsAsync($"TableName eq '{udf.TableName}' and Name eq '{udf.Name}'");
+                var exists = await _fieldRepo.ExistsAsync(x => x.TableName == udf.TableName && x.Name == udf.Name);
                 if (!exists)
                 {
                     await _fieldRepo.AddAsync(udf);
