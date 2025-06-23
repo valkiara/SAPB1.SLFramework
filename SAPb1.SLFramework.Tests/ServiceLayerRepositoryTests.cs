@@ -22,7 +22,7 @@ namespace SAPb1.SLFramework.Tests
         {
             // Act
             var result = await ServiceLayerRepository.QueryAsync(
-                filter: x => x.CardCode == "BPS0253",
+                filter: x => x.CardType == SAPB1.SLFramework.Enums.BoCardTypes.cCustomer,
                 select: x => new BusinessPartners() { CardCode = x.CardCode, CardName = x.CardName });
 
             // Assert

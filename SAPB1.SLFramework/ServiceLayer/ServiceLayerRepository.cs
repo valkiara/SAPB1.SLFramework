@@ -226,8 +226,22 @@ namespace SAPB1.SLFramework.ServiceLayer
                 request = request.SetQueryParam("$top", pageSize.Value.ToString());
             }
 
-            var result = await request.GetAsync<ODataResult<IEnumerable<T>>>(false);
-            return result.Value?.Select(select?.Compile() ?? (x => (T)(object)x)) ?? Enumerable.Empty<T>();
+            return await request.GetAsync<IEnumerable<T>>();
+        }
+
+
+        public async Task<ODataResult<IEnumerable<T>>> QueryAsync(string rawQuery)
+        {
+            if (string.IsNullOrWhiteSpace(rawQuery))
+                throw new ArgumentException("Query string must not be null or empty.", nameof(rawQuery));
+
+            var request = _connection.Request($"{_resource}?{rawQuery}");
+            return await request.GetAsync<ODataResult<IEnumerable<T>>>(false);
+        }
+
+        public ODataResult<IEnumerable<T>> Query(string rawQuery)
+        {
+            return QueryAsync(rawQuery).GetAwaiter().GetResult();
         }
 
 

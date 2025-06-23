@@ -23,14 +23,61 @@ namespace SAPB1.SLFramework.Utilities
             };
         }
 
-        private static string VisitBinary(BinaryExpression expr)
+        private static string VisitBinary(BinaryExpression binary)
         {
-            var left = Visit(expr.Left);
-            var right = Visit(expr.Right);
-            var op = GetOperator(expr.NodeType);
+            var left = Visit(binary.Left);
 
+            string right;
+
+            // Only evaluate the right if it does NOT depend on the parameter
+            if (IsParameterDependent(binary.Right))
+            {
+                right = Visit(binary.Right);
+            }
+            else
+            {
+                try
+                {
+                    var rightValue = EvaluateExpression(binary.Right);
+                    string? propertyName = GetPropertyName(binary.Left);
+                    right = FormatConstant(rightValue, propertyName);
+                }
+                catch
+                {
+                    right = Visit(binary.Right);
+                }
+            }
+
+            var op = GetOperator(binary.NodeType);
             return $"({left} {op} {right})";
         }
+
+        private static string? GetPropertyName(Expression expr)
+        {
+            if (expr is MemberExpression memberExpr)
+                return memberExpr.Member.Name;
+
+            if (expr is UnaryExpression unaryExpr)
+                return GetPropertyName(unaryExpr.Operand);
+
+            return null;
+        }
+
+
+
+        private static bool IsParameterDependent(Expression expr)
+        {
+            return expr switch
+            {
+                ParameterExpression => true,
+                MemberExpression m => IsParameterDependent(m.Expression),
+                UnaryExpression u => IsParameterDependent(u.Operand),
+                _ => false
+            };
+        }
+
+
+
 
         private static string GetOperator(ExpressionType type) => type switch
         {
@@ -51,7 +98,17 @@ namespace SAPB1.SLFramework.Utilities
                 throw new NotSupportedException("Only instance methods with one argument are supported.");
 
             string target = Visit(expr.Object);
-            string argument = Visit(expr.Arguments[0]);
+            string argument;
+
+            try
+            {
+                var val = EvaluateExpression(expr.Arguments[0]);
+                argument = FormatConstant(val);
+            }
+            catch (NotSupportedException)
+            {
+                argument = Visit(expr.Arguments[0]);
+            }
 
             return expr.Method.Name switch
             {
@@ -64,62 +121,96 @@ namespace SAPB1.SLFramework.Utilities
 
         private static string VisitMember(MemberExpression expr)
         {
-            // If the expression is a captured constant (e.g., from closure), extract the value
-            if (expr.Expression is ConstantExpression constExpr)
+            if (expr.Expression is ParameterExpression)
             {
-                var container = constExpr.Value;
-                var member = expr.Member;
-
-                return FormatConstant(GetMemberValue(container, member));
+                return expr.Member.Name;
             }
 
-            // Nullable types: get the actual member
-            if (expr.Member.Name == "Value" && Nullable.GetUnderlyingType(expr.Type) != null)
+            try
             {
-                return Visit(expr.Expression!);
+                var value = EvaluateExpression(expr);
+                return FormatConstant(value);
             }
-
-            return expr.Member.Name;
-        }
-
-        private static object? GetMemberValue(object? obj, MemberInfo member)
-        {
-            return member switch
+            catch (Exception ex)
             {
-                PropertyInfo prop => prop.GetValue(obj),
-                FieldInfo field => field.GetValue(obj),
-                _ => throw new NotSupportedException($"Member type '{member.MemberType}' not supported.")
-            };
+                throw new NotSupportedException($"Unsupported member expression: {expr}", ex);
+            }
         }
 
         private static string VisitUnary(UnaryExpression expr)
         {
-            // Handle conversions or parentheses
             if (expr.NodeType == ExpressionType.Convert)
                 return Visit(expr.Operand);
 
-            // Handle ! (not) operator
             if (expr.NodeType == ExpressionType.Not)
             {
-                string operand = Visit(expr.Operand);
+                var operand = Visit(expr.Operand);
                 return $"not ({operand})";
             }
 
             throw new NotSupportedException($"Unary expression '{expr.NodeType}' is not supported.");
         }
 
-        private static string FormatConstant(object? value)
+        private static object? EvaluateExpression(Expression expr)
         {
+            switch (expr)
+            {
+                case ConstantExpression constant:
+                    return constant.Value;
+
+                case MemberExpression memberExpr:
+                    if (memberExpr.Expression is ParameterExpression)
+                        throw new NotSupportedException("Cannot evaluate parameter expression directly.");
+
+                    var obj = EvaluateExpression(memberExpr.Expression!);
+                    return memberExpr.Member switch
+                    {
+                        FieldInfo f => f.GetValue(obj),
+                        PropertyInfo p => p.GetValue(obj),
+                        _ => throw new NotSupportedException("Unsupported member type.")
+                    };
+
+                case UnaryExpression unary:
+                    return EvaluateExpression(unary.Operand); // ⚠ preserves enum
+
+                case ParameterExpression:
+                    throw new NotSupportedException("Parameter expression cannot be evaluated.");
+
+                default:
+                    var lambda = Expression.Lambda(expr);
+                    return lambda.Compile().DynamicInvoke(); // ⚠ this may box enums too, but usually keeps type
+            }
+        }
+
+
+
+        private static string FormatConstant(object? value, string? propertyName = null)
+        {
+            if (value == null)
+                return "null";
+
+            var type = value.GetType();
+
+            if (type.IsEnum)
+            {
+                if (!string.IsNullOrEmpty(propertyName) && propertyName.StartsWith("U_"))
+                {
+                    return Convert.ToInt32(value).ToString(); // for SAP UDFs
+                }
+                else
+                {
+                    return $"'{value}'"; // for enums like cCustomer
+                }
+            }
+
             return value switch
             {
-                null => "null",
                 string s => $"'{s}'",
                 bool b => b.ToString().ToLower(),
                 DateTime dt => $"'{dt:yyyy-MM-ddTHH:mm:ss}'",
-                Enum e => $"'{e}'",
                 _ => value.ToString()!
             };
         }
+
     }
 }
-
