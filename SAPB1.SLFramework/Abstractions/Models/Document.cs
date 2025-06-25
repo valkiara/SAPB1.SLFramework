@@ -24,6 +24,8 @@ namespace SAPB1.SLFramework.Abstractions.Models
         /// </summary>
         public BoStatus DocumentStatus { get; set; }
 
+        public DownPaymentTypeEnum? DownPaymentType { get; set; }
+
         /// <summary>
         /// Sets or returns the business place ID assigned to a marketing document (such as, invoice).
         /// </summary>
@@ -71,15 +73,15 @@ namespace SAPB1.SLFramework.Abstractions.Models
         /// </summary>
         public double? DocTotal { get; set; }
 
+        public double? DocTotalFc { get; set; }
+
+        public string? ControlAccount { get; set; }
+
         /// <summary>
         /// Returns the Document Line objects.
         /// </summary>
-        public IList<DocumentLine> DocumentLines { get; set; }
-
-        public Document()
-        {
-            DocumentLines = [];
-        }
+        public IList<DocumentLine> DocumentLines { get; set; } = [];
+        public IList<DownPaymentToDraw> DownPaymentsToDraw { get; set; } = [];
     }
 
     /// <summary>
@@ -143,5 +145,23 @@ namespace SAPB1.SLFramework.Abstractions.Models
         public double? GrossPrice { get; set; }
 
         public string? AccountCode { get; set; }
+
+        public IList<DownPaymentToDrawDetails> DownPaymentsToDrawDetails { get; set; } = [];
+    }
+
+    public class DownPaymentToDraw
+    {
+        public int? DocEntry { get; set; }
+        public double? AmountToDraw { get; set; }
+        public double? AmountToDrawFC { get; set; }
+        public ICollection<DownPaymentToDrawDetails> DownPaymentsToDrawDetails { get; set; } = [];
+        
+    }
+
+    public class DownPaymentToDrawDetails
+    {
+        public string? VatGroupCode { get; set; }
+        public double? AmountToDraw { get; set; }
+        public double? AmountToDrawFC { get; set; }
     }
 }
