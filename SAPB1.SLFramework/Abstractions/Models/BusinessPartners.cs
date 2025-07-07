@@ -12,9 +12,10 @@ namespace SAPB1.SLFramework.Abstractions.Models
         public string? Phone1 { get; set; }
         public string? IBAN { get; set; }
         public string? DefaultBankCode { get; set; }
+        public int? GroupCode { get; set; }
         public string? EmailAddress { get; set; }
         public string? DownPaymentClearAct { get; set; }
-
+        public BoYesNoEnum? Valid { get; set; }
         public IList<BPBankAccount>? BPBankAccounts { get; set; }
 
         public IList<BPAccountReceivablePayble>? BPAccountReceivablePaybleCollection { get; set; }
