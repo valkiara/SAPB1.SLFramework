@@ -11,5 +11,6 @@ namespace SAPB1.SLFramework.Abstractions.Models
         public string? Code { get; set; }
         public string? Name { get; set; }        
         public int? BankCodeDigits { get; set; }
+
     }
 }
