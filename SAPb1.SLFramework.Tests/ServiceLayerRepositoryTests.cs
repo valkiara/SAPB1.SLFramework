@@ -28,9 +28,21 @@ namespace SAPb1.SLFramework.Tests
         public async Task WhereAsync_ShouldReturnFilteredResults()
         {
             // Act
-            var result = await ServiceLayerRepository.QueryAsync(
-                filter: x => x.CardType == SAPB1.SLFramework.Enums.BoCardTypes.cCustomer,
-                select: x => new BusinessPartners() { CardCode = x.CardCode, CardName = x.CardName });
+            var result = await ServiceLayerRepositoryBp.QueryAsync(
+                filter: x => x.Valid == SAPB1.SLFramework.Enums.BoYesNoEnum.tYES && x.GroupCode == 100,
+                select: x => new BusinessPartners() { CardCode = x.CardCode, CardName = x.CardName , Valid = x.Valid, GroupCode = x.GroupCode });
+
+            // Assert
+            Assert.NotNull(result);
+        }
+
+        [Fact]
+        public async Task WhereAsync_CountriesCode()
+        {
+            // Act
+            var result = await ServiceLayerRepositoryCountryCode.QueryAsync(
+                filter: x => x.BankCodeDigits == 1,
+                select: x => new Countries() { Code = x.Code , Name = x.Name , BankCodeDigits = x.BankCodeDigits });
 
             // Assert
             Assert.NotNull(result);
@@ -44,5 +56,6 @@ namespace SAPb1.SLFramework.Tests
             // Assert
             Assert.NotNull(result);
         }
+
     }
 }
