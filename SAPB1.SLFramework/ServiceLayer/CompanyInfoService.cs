@@ -4,15 +4,10 @@ using SAPB1.SLFramework.Abstractions.Models;
 
 namespace SAPB1.SLFramework.ServiceLayer
 {
-    public class CompanyInfoService : ICompanyInfoService
+    public class CompanyInfoService(SLConnection connection) : ICompanyInfoService
     {
-        private readonly SLConnection _connection;
+        private readonly SLConnection _connection = connection ?? throw new ArgumentNullException(nameof(connection));
         private readonly string _resource = "CompanyService_GetCompanyInfo";
-
-        public CompanyInfoService(SLConnection connection)
-        {
-            _connection = connection ?? throw new ArgumentNullException(nameof(connection));
-        }
 
         public async Task<CompanyInfo> GetAsync(CancellationToken cancellationToken = default)
         {
