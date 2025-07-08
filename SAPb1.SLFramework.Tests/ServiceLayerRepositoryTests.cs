@@ -9,7 +9,8 @@ namespace SAPb1.SLFramework.Tests
 {
     public class ServiceLayerRepositoryTests
     {
-        public IServiceLayerRepository<BusinessPartners> ServiceLayerRepository { get; set; }
+        public IServiceLayerRepository<BusinessPartners> ServiceLayerRepositoryBp { get; set; }
+        public IServiceLayerRepository<Countries> ServiceLayerRepositoryCountryCode { get; set; }
         public ICompanyInfoService CompanyInfoService { get; set; }
 
 
@@ -19,7 +20,8 @@ namespace SAPb1.SLFramework.Tests
 
             var slConn = new SLConnection("https://srv-pl4:50000/b1s/v2/", "SalesDB", "beka", "1234");
 
-            ServiceLayerRepository = new ServiceLayerRepository<BusinessPartners>(slConn);
+            ServiceLayerRepositoryBp = new ServiceLayerRepository<BusinessPartners>(slConn);
+            ServiceLayerRepositoryCountryCode = new ServiceLayerRepository<Countries>(slConn);
 
             CompanyInfoService = new CompanyInfoService(slConn);
         }
