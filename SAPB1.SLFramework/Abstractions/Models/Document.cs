@@ -19,6 +19,9 @@ namespace SAPB1.SLFramework.Abstractions.Models
         public BoObjectTypes? DocObjectCode { get; set; }
 
 
+        public BoDocumentTypes? DocType { get; set; }
+
+
         /// <summary>
         /// Returns a valid value of BoStatus type that specifies document status (closed or open).
         /// </summary>
