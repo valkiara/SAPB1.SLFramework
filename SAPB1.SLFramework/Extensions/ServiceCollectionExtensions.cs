@@ -41,6 +41,7 @@ namespace SAPB1.SLFramework.Extensions
             // 4. Register generic ServiceLayerRepository<T>
             services.AddTransient(typeof(IServiceLayerRepository<>), typeof(ServiceLayerRepository<>));
             services.AddTransient<ICompanyInfoService, CompanyInfoService>();
+            services.AddScoped<IServiceLayerQueryService, ServiceLayerQueryService>();
 
             // 5. Scan for metadata definitions (attributes or configuration)
             services.AddSingleton(sp => MetadataScanner.ScanUserTables(sp));

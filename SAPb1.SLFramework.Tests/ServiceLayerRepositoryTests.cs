@@ -2,8 +2,7 @@ using B1SLayer;
 using SAPB1.SLFramework.Abstractions.Interfaces;
 using SAPB1.SLFramework.Abstractions.Models;
 using SAPB1.SLFramework.ServiceLayer;
-using SAPB1.SLFramework.Utilities;
-using System.Linq.Expressions;
+using System.Text.Json;
 
 namespace SAPb1.SLFramework.Tests
 {
@@ -12,18 +11,23 @@ namespace SAPb1.SLFramework.Tests
         public IServiceLayerRepository<BusinessPartners> ServiceLayerRepositoryBp { get; set; }
         public IServiceLayerRepository<Countries> ServiceLayerRepositoryCountryCode { get; set; }
         public ICompanyInfoService CompanyInfoService { get; set; }
+        public IServiceLayerQueryService ServiceLayerQueryService { get; set; }
 
 
         public ServiceLayerRepositoryTests()
         {
             //var slConn = new SLConnection("https://10.132.10.103:50000/b1s/v2/", "BATUMI_RIVIERA_TEST", "manager", "Aa123456!");
 
-            var slConn = new SLConnection("https://srv-pl4:50000/b1s/v2/", "SalesDB", "beka", "1234");
+            //var slConn = new SLConnection("https://srv-pl4:50000/b1s/v2/", "SalesDB", "beka", "1234");
+
+            var slConn = new SLConnection("https://172.184.141.196:50000/b1s/v2/", "OrangeMed_Test", "manager", "OmLogin76!");
 
             ServiceLayerRepositoryBp = new ServiceLayerRepository<BusinessPartners>(slConn);
             ServiceLayerRepositoryCountryCode = new ServiceLayerRepository<Countries>(slConn);
 
             CompanyInfoService = new CompanyInfoService(slConn);
+
+            ServiceLayerQueryService = new ServiceLayerQueryService(slConn);
         }
 
         [Fact]
@@ -59,5 +63,47 @@ namespace SAPb1.SLFramework.Tests
             Assert.NotNull(result);
         }
 
+
+        [Fact]
+        public async Task GetQueryAsync_ShouldReturnFilteredResults()
+        {
+            // Act
+            var result = await ServiceLayerQueryService.PostQueryAsync(
+     "$crossjoin(PurchaseDeliveryNotes, PurchaseDeliveryNotes/DocumentLines)",
+     "$expand=PurchaseDeliveryNotes($select=DocEntry),PurchaseDeliveryNotes/DocumentLines($select=BaseEntry,BaseType)" +
+     "&$filter=PurchaseDeliveryNotes/DocEntry eq PurchaseDeliveryNotes/DocumentLines/DocEntry and PurchaseDeliveryNotes/DocumentLines/BaseEntry eq 9199 and PurchaseDeliveryNotes/DocumentLines/BaseType eq 22"
+ );
+            // Assert
+            Assert.NotNull(result);
+
+            var docEntries = ExtractDocEntriesFromCrossJoin(result);
+
+            foreach (var docEntry in docEntries)
+            {
+                Console.WriteLine($"Found PDN DocEntry: {docEntry}");
+            }
+        }
+
+
+        public static List<int> ExtractDocEntriesFromCrossJoin(string json)
+        {
+            var result = new List<int>();
+
+            using var doc = JsonDocument.Parse(json);
+            if (!doc.RootElement.TryGetProperty("value", out var valueArray) || valueArray.ValueKind != JsonValueKind.Array)
+                return result;
+
+            foreach (var item in valueArray.EnumerateArray())
+            {
+                if (item.TryGetProperty("PurchaseDeliveryNotes", out var pdnElement) &&
+                    pdnElement.TryGetProperty("DocEntry", out var docEntryElement) &&
+                    docEntryElement.TryGetInt32(out var docEntry))
+                {
+                    result.Add(docEntry);
+                }
+            }
+
+            return result;
+        }
     }
 }
