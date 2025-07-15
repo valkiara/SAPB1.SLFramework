@@ -71,7 +71,7 @@ namespace SAPb1.SLFramework.Tests
             var result = await ServiceLayerQueryService.PostQueryAsync(
      "$crossjoin(PurchaseDeliveryNotes, PurchaseDeliveryNotes/DocumentLines)",
      "$expand=PurchaseDeliveryNotes($select=DocEntry),PurchaseDeliveryNotes/DocumentLines($select=BaseEntry,BaseType)" +
-     "&$filter=PurchaseDeliveryNotes/DocEntry eq PurchaseDeliveryNotes/DocumentLines/DocEntry and PurchaseDeliveryNotes/DocumentLines/BaseEntry eq 9199 and PurchaseDeliveryNotes/DocumentLines/BaseType eq 22"
+     "&$filter=PurchaseDeliveryNotes/DocEntry eq PurchaseDeliveryNotes/DocumentLines/DocEntry and PurchaseDeliveryNotes/DocumentLines/BaseEntry eq 91991 and PurchaseDeliveryNotes/DocumentLines/BaseType eq 22"
  );
             // Assert
             Assert.NotNull(result);
