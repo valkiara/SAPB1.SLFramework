@@ -29,11 +29,22 @@ namespace SAPB1.SLFramework.ServiceLayer
 
         public async Task<T> AddAsync(T entity)
         {
+            await _connection.Request(_resource).PostAsync(entity);
+
             return await _connection.Request(_resource).PostAsync<T>(entity);
         }
 
+        public async Task AddAsyncNoContent(T entity)
+        {
+            await _connection.Request(_resource).PostAsync(entity);
+        }
+
+
         public T Add(T entity)
             => AddAsync(entity).GetAwaiter().GetResult();
+
+        public void AddNoContent(T entity)
+            => AddAsyncNoContent(entity).GetAwaiter().GetResult();
 
         public async Task<T?> GetAsync(object id)
         {

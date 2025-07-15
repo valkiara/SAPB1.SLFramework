@@ -59,5 +59,7 @@ namespace SAPB1.SLFramework.Abstractions.Interfaces
         T Single(Expression<Func<T, bool>> filter);
         Task<ODataResult<IEnumerable<T>>> QueryAsync(string rawQuery);
         ODataResult<IEnumerable<T>> Query(string rawQuery);
+        Task AddAsyncNoContent(T entity);
+        void AddNoContent(T entity);
     }
 }
