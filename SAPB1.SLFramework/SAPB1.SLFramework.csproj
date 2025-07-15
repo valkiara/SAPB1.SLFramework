@@ -5,6 +5,12 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <PackageIcon>icon.png</PackageIcon>
+    <PackageId>SAPB1.SLFramework</PackageId>
+    <Description>SAP B1 Serice Layer Framework.</Description>
+    <PackageProjectUrl>https://github.com/valkiara/SAPB1.SLFramework</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/valkiara/SAPB1.SLFramework</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
   <ItemGroup>
