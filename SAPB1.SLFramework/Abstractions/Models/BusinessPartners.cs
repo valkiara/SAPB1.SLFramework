@@ -15,6 +15,7 @@ namespace SAPB1.SLFramework.Abstractions.Models
         public string? EmailAddress { get; set; }
         public string? DownPaymentClearAct { get; set; }
         public BoYesNoEnum? Valid { get; set; }
+        public BoYesNoEnum? SubjectToWithholdingTax { get; set; }
         public IList<BPBankAccount>? BPBankAccounts { get; set; }
 
         public IList<BPAccountReceivablePayble>? BPAccountReceivablePaybleCollection { get; set; }
