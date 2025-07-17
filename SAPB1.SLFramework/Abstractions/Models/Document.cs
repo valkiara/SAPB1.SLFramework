@@ -115,6 +115,16 @@ namespace SAPB1.SLFramework.Abstractions.Models
         /// </summary>
         public double Quantity { get; set; }
 
+        public double? RemainingOpenQuantity { get; set; }
+
+        public double? OpenAmount { get; set; }
+
+        public double? OpenAmountFC { get; set; }
+        public double? OpenAmountSC { get; set; }
+
+        public double? PackageQuantity { get; set; }
+
+        public BoStatus? LineStatus { get; set; }
 
         /// <summary>
         ///  Sets or returns the warehouse code where the item is stored.

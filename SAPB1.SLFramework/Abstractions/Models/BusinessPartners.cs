@@ -1,5 +1,4 @@
 ﻿using SAPB1.SLFramework.Enums;
-using System.Collections.ObjectModel;
 
 namespace SAPB1.SLFramework.Abstractions.Models
 {
