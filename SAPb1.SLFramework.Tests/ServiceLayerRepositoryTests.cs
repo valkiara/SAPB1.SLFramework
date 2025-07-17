@@ -16,11 +16,12 @@ namespace SAPb1.SLFramework.Tests
 
         public ServiceLayerRepositoryTests()
         {
+            var slConn = new SLConnection("https://srv-pl4:50000/b1s/v2/", "SalesDB", "beka", "1234");
+           
+            
             //var slConn = new SLConnection("https://10.132.10.103:50000/b1s/v2/", "BATUMI_RIVIERA_TEST", "manager", "Aa123456!");
 
-            //var slConn = new SLConnection("https://srv-pl4:50000/b1s/v2/", "SalesDB", "beka", "1234");
-
-            var slConn = new SLConnection("https://172.184.141.196:50000/b1s/v2/", "OrangeMed_Test", "manager", "OmLogin76!");
+           
 
             ServiceLayerRepositoryBp = new ServiceLayerRepository<BusinessPartners>(slConn);
             ServiceLayerRepositoryCountryCode = new ServiceLayerRepository<Countries>(slConn);
