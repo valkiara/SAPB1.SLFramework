@@ -66,7 +66,6 @@ namespace SAPB1.SLFramework.Abstractions.Attributes
         /// <summary>
         /// Linked system object type (e.g. SalesOrder, BusinessPartner, etc.)
         /// </summary>
-        public UDFLinkedSystemObjectTypesEnum LinkedSystemObject { get; set; }
-            = UDFLinkedSystemObjectTypesEnum.ulNone;
+        public UDFLinkedSystemObjectTypesEnum? LinkedSystemObject { get; set; }
     }
 }

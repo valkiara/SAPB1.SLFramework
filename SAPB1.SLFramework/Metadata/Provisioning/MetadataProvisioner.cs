@@ -33,13 +33,13 @@ namespace SAPB1.SLFramework.Metadata.Provisioning
             // Provision UDTs first
             foreach (var udt in _tables)
             {
-                // use primary key of UDT is TableName
-                var exists = await _tableRepo.ExistsAsync(x => x.TableName == udt.TableName);
-                if (!exists)
+                var existing = await _tableRepo.FirstOrDefaultAsync(x => x.TableName == udt.TableName);
+
+                if (existing == null)
                 {
                     await _tableRepo.AddAsync(udt);
                 }
-                else
+                else if (udt.IsDifferentFrom(existing))
                 {
                     await _tableRepo.UpdateAsync(udt.TableName, udt);
                 }
@@ -48,18 +48,19 @@ namespace SAPB1.SLFramework.Metadata.Provisioning
             // Provision UDFs next
             foreach (var udf in _fields)
             {
-                var exists = await _fieldRepo.ExistsAsync(x => x.TableName == udf.TableName && x.Name == udf.Name);
-                if (!exists)
+                var existingField = await _fieldRepo.FirstOrDefaultAsync(x => x.TableName == udf.TableName && x.Name == udf.Name);
+
+                if (existingField == null)
                 {
                     await _fieldRepo.AddAsync(udf);
                 }
-                else
+                else if (udf.IsDifferentFrom(existingField))
                 {
-                    var existingField = await _fieldRepo.FirstAsync(x => x.TableName == udf.TableName && x.Name == udf.Name);
                     string fieldKey = $"TableName='{existingField.TableName}',FieldID={existingField.FieldID}";
                     await _fieldRepo.UpdateAsync(fieldKey, udf);
                 }
             }
+
         }
     }
 }
