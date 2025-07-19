@@ -92,7 +92,7 @@ namespace SAPB1.SLFramework.Abstractions.Models
     /// </summary>
     public class DocumentLine
     {
-        public int LineNum { get; set; }
+        public int? LineNum { get; set; }
 
         public int? BaseType { get; set; }
         public int? BaseEntry { get; set; }
