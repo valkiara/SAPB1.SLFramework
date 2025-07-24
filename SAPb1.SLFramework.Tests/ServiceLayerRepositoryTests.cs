@@ -10,20 +10,22 @@ namespace SAPb1.SLFramework.Tests
     {
         public IServiceLayerRepository<BusinessPartners> ServiceLayerRepositoryBp { get; set; }
         public IServiceLayerRepository<Countries> ServiceLayerRepositoryCountryCode { get; set; }
+        public IServiceLayerRepository<Orders> OrdersRepository { get; set; }
         public ICompanyInfoService CompanyInfoService { get; set; }
         public IServiceLayerQueryService ServiceLayerQueryService { get; set; }
 
 
         public ServiceLayerRepositoryTests()
         {
-            var slConn = new SLConnection("https://srv-pl4:50000/b1s/v2/", "SalesDB", "beka", "1234");
+            //var slConn = new SLConnection("https://srv-pl4:50000/b1s/v2/", "SalesDB", "beka", "1234");
            
             
-            //var slConn = new SLConnection("https://10.132.10.103:50000/b1s/v2/", "BATUMI_RIVIERA_TEST", "manager", "Aa123456!");
+            var slConn = new SLConnection("https://10.132.10.103:50000/b1s/v2/", "BATUMI_RIVIERA_TEST", "manager", "Aa123456!");
 
 
             ServiceLayerRepositoryBp = new ServiceLayerRepository<BusinessPartners>(slConn);
             ServiceLayerRepositoryCountryCode = new ServiceLayerRepository<Countries>(slConn);
+            OrdersRepository = new ServiceLayerRepository<Orders>(slConn);
 
             CompanyInfoService = new CompanyInfoService(slConn);
 
@@ -84,6 +86,15 @@ namespace SAPb1.SLFramework.Tests
             }
         }
 
+
+        [Fact]
+        public async Task OrderRepoTest()
+        {
+            var result = await OrdersRepository.FirstOrDefaultAsync(x => x.DocumentStatus == SAPB1.SLFramework.Enums.BoStatus.bost_Close || x.Cancelled == SAPB1.SLFramework.Enums.BoYesNoEnum.tYES);
+
+
+            Assert.NotNull(result);
+        }
 
         public static List<int> ExtractDocEntriesFromCrossJoin(string json)
         {
