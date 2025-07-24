@@ -21,7 +21,6 @@ namespace SAPb1.SLFramework.Tests
             
             //var slConn = new SLConnection("https://10.132.10.103:50000/b1s/v2/", "BATUMI_RIVIERA_TEST", "manager", "Aa123456!");
 
-           
 
             ServiceLayerRepositoryBp = new ServiceLayerRepository<BusinessPartners>(slConn);
             ServiceLayerRepositoryCountryCode = new ServiceLayerRepository<Countries>(slConn);

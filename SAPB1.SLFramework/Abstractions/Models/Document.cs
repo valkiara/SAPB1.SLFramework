@@ -21,6 +21,20 @@ namespace SAPB1.SLFramework.Abstractions.Models
 
         public BoDocumentTypes? DocType { get; set; }
 
+        /// <summary>
+        /// Indicates the document cancel status.
+        /// </summary>
+        public CancelStatusEnum CancelStatus { get; set; }
+
+        /// <summary>
+        /// Sets or returns the cancel date of the sales order or purchase order. After this date, shipping the goods to the customer or from the vendor is not allowed. 
+        /// </summary>
+        public DateTimeOffset? CancelDate { get; set; }
+
+        /// <summary>
+        /// Indicates whether the document was cancelled.
+        /// </summary>
+        public BoYesNoEnum Cancelled { get; set; }
 
         /// <summary>
         /// Returns a valid value of BoStatus type that specifies document status (closed or open).
