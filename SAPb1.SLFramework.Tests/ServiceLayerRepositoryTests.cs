@@ -17,10 +17,10 @@ namespace SAPb1.SLFramework.Tests
 
         public ServiceLayerRepositoryTests()
         {
-            //var slConn = new SLConnection("https://srv-pl4:50000/b1s/v2/", "SalesDB", "beka", "1234");
+            var slConn = new SLConnection("https://srv-pl4:50000/b1s/v2/", "SalesDB", "beka", "1234");
            
             
-            var slConn = new SLConnection("https://10.132.10.103:50000/b1s/v2/", "BATUMI_RIVIERA_TEST", "manager", "Aa123456!");
+            //var slConn = new SLConnection("https://10.132.10.103:50000/b1s/v2/", "BATUMI_RIVIERA_TEST", "manager", "Aa123456!");
 
 
             ServiceLayerRepositoryBp = new ServiceLayerRepository<BusinessPartners>(slConn);
@@ -31,6 +31,16 @@ namespace SAPb1.SLFramework.Tests
 
             ServiceLayerQueryService = new ServiceLayerQueryService(slConn);
         }
+
+        [Fact]
+        public async Task FirstOrDefaultAsync_ShouldReturnSingleResult()
+        {
+            // Act
+            var result = await OrdersRepository.FirstOrDefaultAsync(x => x.Cancelled == SAPB1.SLFramework.Enums.BoYesNoEnum.tNO);
+            // Assert
+            Assert.NotNull(result);
+        }
+
 
         [Fact]
         public async Task WhereAsync_ShouldReturnFilteredResults()

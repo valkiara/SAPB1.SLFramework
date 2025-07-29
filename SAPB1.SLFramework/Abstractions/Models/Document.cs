@@ -1,4 +1,5 @@
 ﻿using SAPB1.SLFramework.Enums;
+using System.Runtime.InteropServices;
 
 namespace SAPB1.SLFramework.Abstractions.Models
 {
@@ -106,80 +107,283 @@ namespace SAPB1.SLFramework.Abstractions.Models
     /// </summary>
     public class DocumentLine
     {
+        /// <summary>Row number in the document.</summary>
         public int? LineNum { get; set; }
 
-        public int? BaseType { get; set; }
+        /// <summary>Document type of the base document (e.g., 17 = Sales Order).</summary>
+        public BoAPARDocumentTypes? BaseType { get; set; }
+
+        /// <summary>Document number of the base document.</summary>
         public int? BaseEntry { get; set; }
+
+        /// <summary>Line number in the base document.</summary>
         public int? BaseLine { get; set; }
 
-        /// <summary>
-        /// Sets or returns the item code in the Document line. The item code must be unique.
-        /// </summary>
+        /// <summary>Item code. Must be unique. (Required)</summary>
         public required string ItemCode { get; set; }
 
-
-        /// <summary>
-        /// Sets or returns the item name/description.
-        /// </summary>
+        /// <summary>Item name/description.</summary>
         public string? ItemDescription { get; set; }
 
-
-        /// <summary>
-        /// Sets or returns the quantity of items.
-        /// </summary>
+        /// <summary>Ordered quantity.</summary>
         public double Quantity { get; set; }
 
+        /// <summary>Remaining quantity not yet delivered or invoiced.</summary>
         public double? RemainingOpenQuantity { get; set; }
 
+        /// <summary>Remaining open inventory quantity.</summary>
+        public double? RemainingOpenInventoryQuantity { get; set; }
+
+        /// <summary>Open amount (local currency).</summary>
         public double? OpenAmount { get; set; }
 
+        /// <summary>Open amount (foreign currency).</summary>
         public double? OpenAmountFC { get; set; }
+
+        /// <summary>Open amount (system currency).</summary>
         public double? OpenAmountSC { get; set; }
 
+        /// <summary>Package quantity.</summary>
         public double? PackageQuantity { get; set; }
 
+        /// <summary>Status of the line (e.g., Open, Closed).</summary>
         public BoStatus? LineStatus { get; set; }
 
-        /// <summary>
-        ///  Sets or returns the warehouse code where the item is stored.
-        /// </summary>
+        /// <summary>Warehouse where the item is stored.</summary>
         public string? WarehouseCode { get; set; }
 
-        /// <summary>
-        /// Sets or returns The key of a UoM. (UoM = Unit of measure)
-        /// </summary>
+        /// <summary>Unit of measure entry (internal key).</summary>
         public int? UoMEntry { get; set; }
 
-
-        /// <summary>
-        ///  Sets or returns the unique code for the UoM. (UoM = Unit of measure)
-        /// </summary>
+        /// <summary>Unit of measure code.</summary>
         public string? UoMCode { get; set; }
 
+        /// <summary>Measurement unit (e.g., KG, EA).</summary>
+        public string? MeasureUnit { get; set; }
 
-        /// <summary>
-        ///  Sets or returns the item price after taxation. 
-        /// </summary>
+        /// <summary>Number of items per measurement unit.</summary>
+        public double? UnitsOfMeasurement { get; set; }
+
+        /// <summary>Item price after VAT.</summary>
         public double? PriceAfterVAT { get; set; }
 
-
-        /// <summary>
-        ///  Sets or returns the VAT group for the item specified in the row. 
-        /// </summary>
-        public string? VatGroup { get; set; }
-
-
-        /// <summary>
-        ///  Price of the item in the sales or purchasing document. 
-        /// </summary>
+        /// <summary>Unit price (before VAT).</summary>
         public double? UnitPrice { get; set; }
 
+        /// <summary>Item price (synonym for UnitPrice).</summary>
+        public double? Price { get; set; }
+
+        /// <summary>Total amount per line (excluding VAT).</summary>
+        public double? LineTotal { get; set; }
+
+        /// <summary>Total amount including VAT.</summary>
+        public double? GrossTotal { get; set; }
+
+        /// <summary>Gross price (price * quantity).</summary>
         public double? GrossPrice { get; set; }
 
+        /// <summary>VAT group for the item.</summary>
+        public string? VatGroup { get; set; }
+
+        /// <summary>Tax code applied to the line.</summary>
+        public string? TaxCode { get; set; }
+
+        /// <summary>Tax percentage per line.</summary>
+        public double? TaxPercentagePerRow { get; set; }
+
+        /// <summary>Tax amount (excluding equalization tax) in local currency.</summary>
+        public double? NetTaxAmount { get; set; }
+
+        /// <summary>Tax amount (FC).</summary>
+        public double? NetTaxAmountFC { get; set; }
+
+        /// <summary>Tax amount (SC).</summary>
+        public double? NetTaxAmountSC { get; set; }
+
+        /// <summary>Total equalization tax.</summary>
+        public double? TotalEqualizationTax { get; set; }
+
+        /// <summary>G/L Account Code (Required for Service Documents).</summary>
         public string? AccountCode { get; set; }
 
+        /// <summary>COGS (Cost of Goods Sold) Account Code.</summary>
+        public string? COGSAccountCode { get; set; }
+
+        /// <summary>Cost Center for Dimension 1.</summary>
+        public string? CostingCode { get; set; }
+
+        /// <summary>Cost Center for Dimension 2.</summary>
+        public string? CostingCode2 { get; set; }
+
+        /// <summary>Cost Center for Dimension 3.</summary>
+        public string? CostingCode3 { get; set; }
+
+        /// <summary>Cost Center for Dimension 4.</summary>
+        public string? CostingCode4 { get; set; }
+
+        /// <summary>Cost Center for Dimension 5.</summary>
+        public string? CostingCode5 { get; set; }
+
+        /// <summary>Sales employee code.</summary>
+        public int? SalesPersonCode { get; set; }
+
+        /// <summary>Project code linked to this line.</summary>
+        public string? ProjectCode { get; set; }
+
+        /// <summary>Requested ship/delivery date.</summary>
+        public DateTime? ShipDate { get; set; }
+
+        /// <summary>Required delivery date.</summary>
+        public DateTime? RequiredDate { get; set; }
+
+        /// <summary>Actual delivery date.</summary>
+        public DateTime? ActualDeliveryDate { get; set; }
+
+        /// <summary>Discount percentage applied to the line.</summary>
+        public double? DiscountPercent { get; set; }
+
+        /// <summary>Whether the line is tax liable.</summary>
+        public BoYesNoEnum? TaxLiable { get; set; }
+
+        /// <summary>Barcode (EAN code) for the item.</summary>
+        public string? BarCode { get; set; }
+
+        /// <summary>Vendor catalog number.</summary>
+        public string? SupplierCatNum { get; set; }
+
+        /// <summary>Free text/comment field for the line.</summary>
+        public string? FreeText { get; set; }
+
+        /// <summary>Item volume.</summary>
+        public double? Volume { get; set; }
+
+        /// <summary>Volume unit (e.g., L, m3).</summary>
+        public int? VolumeUnit { get; set; }
+
+        /// <summary>Primary weight of the item.</summary>
+        public double? Weight1 { get; set; }
+
+        /// <summary>Secondary weight of the item.</summary>
+        public double? Weight2 { get; set; }
+
+        /// <summary>Unit of measure for primary weight.</summary>
+        public int? Weight1Unit { get; set; }
+
+        /// <summary>Unit of measure for secondary weight.</summary>
+        public int? Weight2Unit { get; set; }
+
+        /// <summary>Primary width of the item.</summary>
+        public double? Width1 { get; set; }
+
+        /// <summary>Secondary width of the item.</summary>
+        public double? Width2 { get; set; }
+
+        /// <summary>Unit of measure for Width1.</summary>
+        public int? Width1Unit { get; set; }
+
+        /// <summary>Unit of measure for Width2.</summary>
+        public int? Width2Unit { get; set; }
+
+        /// <summary>Primary height of the item.</summary>
+        public double? Height1 { get; set; }
+
+        /// <summary>Secondary height of the item.</summary>
+        public double? Height2 { get; set; }
+
+        /// <summary>Unit of measure for Height1.</summary>
+        public int? Height1Unit { get; set; }
+
+        /// <summary>Unit of measure for Height2.</summary>
+        public int? Height2Unit { get; set; }
+
+        /// <summary>Primary length of the item.</summary>
+        public double? Lengh1 { get; set; }
+
+        /// <summary>Secondary length of the item.</summary>
+        public double? Lengh2 { get; set; }
+
+        /// <summary>Unit of measure for Lengh1.</summary>
+        public int? Lengh1Unit { get; set; }
+
+        /// <summary>Unit of measure for Lengh2.</summary>
+        public int? Lengh2Unit { get; set; }
+
+        /// <summary>Address (used in purchasing documents).</summary>
+        public string? Address { get; set; }
+
+        /// <summary>CNPJ of the manufacturer (Brazil localization).</summary>
+        public string? CNJPOfManufacturer { get; set; }
+
+        /// <summary>Country of origin code (ISO Alpha-3).</summary>
+        public string? CountryOrg { get; set; }
+
+        /// <summary>Original item code (if substituted by an alternative).</summary>
+        public string? OriginalItem { get; set; }
+
+        /// <summary>Currency of the line.</summary>
+        public string? Currency { get; set; }
+
+        /// <summary>Agreement number (Blanket Agreement).</summary>
+        public int? AgreementNo { get; set; }
+
+        /// <summary>Agreement row number.</summary>
+        public int? AgreementRowNumber { get; set; }
+
+        /// <summary>Actual base document entry.</summary>
+        public int? ActualBaseEntry { get; set; }
+
+        /// <summary>Actual base document line number.</summary>
+        public int? ActualBaseLine { get; set; }
+
+        /// <summary>Applied tax amount (local currency).</summary>
+        public double? AppliedTax { get; set; }
+
+        /// <summary>Applied tax amount (foreign currency).</summary>
+        public double? AppliedTaxFC { get; set; }
+
+        /// <summary>Applied tax amount (system currency).</summary>
+        public double? AppliedTaxSC { get; set; }
+
+        /// <summary>Ship-To address code.</summary>
+        public string? ShipToCode { get; set; }
+
+        /// <summary>Vendor assigned to this line (if applicable).</summary>
+        public string? LineVendor { get; set; }
+
+        /// <summary>Additional identifier for the item (SWW field).</summary>
+        public string? SWW { get; set; }
+
+        /// <summary>Total tax amount (including equalization tax).</summary>
+        public double? TaxTotal { get; set; }
+
+        /// <summary>Tax before down payments (local currency).</summary>
+        public double? TaxBeforeDPM { get; set; }
+
+        /// <summary>Tax before down payments (FC).</summary>
+        public double? TaxBeforeDPMFC { get; set; }
+
+        /// <summary>Tax before down payments (SC).</summary>
+        public double? TaxBeforeDPMSC { get; set; }
+
+        /// <summary>Total amount (FC).</summary>
+        public double? RowTotalFC { get; set; }
+
+        /// <summary>Total amount (SC).</summary>
+        public double? RowTotalSC { get; set; }
+
+        /// <summary>Visual order of the line.</summary>
+        public int? VisualOrder { get; set; }
+
+        /// <summary>True if this is a non-inventory-affecting document.</summary>
+        public BoYesNoEnum? WithoutInventoryMovement { get; set; }
+
+        /// <summary>Exchange rate for this row.</summary>
+        public double? Rate { get; set; }
+
+        /// <summary>Down payments linked to this line.</summary>
         public IList<DownPaymentToDrawDetails> DownPaymentsToDrawDetails { get; set; } = [];
     }
+
 
     public class DownPaymentToDraw
     {
