@@ -52,6 +52,10 @@ namespace SAPB1.SLFramework.Abstractions.Models
         public double? CashSum { get; set; }
 
         public BoYesNoEnum? IsPayToBank { get; set; }
+
+        public IList<PaymentAccount> PaymentAccounts { get; set; } = [];
+        public IList<PaymentInvoice> PaymentInvoices { get; set; } = [];
+        public IList<CashFlowAssignment> CashFlowAssignments { get; set; } = [];
     }
 
     public class PaymentAccount
