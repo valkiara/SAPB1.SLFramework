@@ -35,6 +35,11 @@ namespace SAPB1.SLFramework.Abstractions.Models
         /// </summary>
         public int? BlanketAgreement { get; set; }
 
+        /// <summary>
+        /// Sets or returns the document code of the currency used in this payment.
+        /// </summary>
+        public string? DocCurrency { get; set; }
+
 
         /// <summary>
         /// Sets or returns the document code of the currency used in this payment.
