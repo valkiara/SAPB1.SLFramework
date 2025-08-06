@@ -2,6 +2,7 @@ using B1SLayer;
 using SAPB1.SLFramework.Abstractions.Interfaces;
 using SAPB1.SLFramework.Abstractions.Models;
 using SAPB1.SLFramework.ServiceLayer;
+using System.Runtime;
 using System.Text.Json;
 
 namespace SAPb1.SLFramework.Tests
@@ -13,14 +14,15 @@ namespace SAPb1.SLFramework.Tests
         public IServiceLayerRepository<Orders> OrdersRepository { get; set; }
         public ICompanyInfoService CompanyInfoService { get; set; }
         public IServiceLayerQueryService ServiceLayerQueryService { get; set; }
+        public ISBOBobService SBOBobService { get; set; }
 
 
         public ServiceLayerRepositoryTests()
         {
-            var slConn = new SLConnection("https://srv-pl4:50000/b1s/v2/", "SalesDB", "beka", "1234");
-           
-            
-            //var slConn = new SLConnection("https://10.132.10.103:50000/b1s/v2/", "BATUMI_RIVIERA_TEST", "manager", "Aa123456!");
+            //var slConn = new SLConnection("https://srv-pl4:50000/b1s/v2/", "SalesDB", "beka", "1234");
+
+
+            var slConn = new SLConnection("https://10.132.10.103:50000/b1s/v2/", "BATUMI_RIVIERA_TEST", "manager", "Aa123456!");
 
 
             ServiceLayerRepositoryBp = new ServiceLayerRepository<BusinessPartners>(slConn);
@@ -30,6 +32,8 @@ namespace SAPb1.SLFramework.Tests
             CompanyInfoService = new CompanyInfoService(slConn);
 
             ServiceLayerQueryService = new ServiceLayerQueryService(slConn);
+
+            SBOBobService = new SBOBobService(slConn);
         }
 
         [Fact]
@@ -48,7 +52,7 @@ namespace SAPb1.SLFramework.Tests
             // Act
             var result = await ServiceLayerRepositoryBp.QueryAsync(
                 filter: x => x.Valid == SAPB1.SLFramework.Enums.BoYesNoEnum.tYES && x.GroupCode == 100,
-                select: x => new BusinessPartners() { CardCode = x.CardCode, CardName = x.CardName , Valid = x.Valid, GroupCode = x.GroupCode });
+                select: x => new BusinessPartners() { CardCode = x.CardCode, CardName = x.CardName, Valid = x.Valid, GroupCode = x.GroupCode });
 
             // Assert
             Assert.NotNull(result);
@@ -60,7 +64,7 @@ namespace SAPb1.SLFramework.Tests
             // Act
             var result = await ServiceLayerRepositoryCountryCode.QueryAsync(
                 filter: x => x.BankCodeDigits == 1,
-                select: x => new Countries() { Code = x.Code , Name = x.Name , BankCodeDigits = x.BankCodeDigits });
+                select: x => new Countries() { Code = x.Code, Name = x.Name, BankCodeDigits = x.BankCodeDigits });
 
             // Assert
             Assert.NotNull(result);
@@ -125,6 +129,18 @@ namespace SAPb1.SLFramework.Tests
             }
 
             return result;
+        }
+
+        [Fact]
+        public async Task SBOBobService_GetCurrencyRate_Test()
+        {
+            // Arrange
+            string currency = "EUR";
+            DateTime date = new DateTime(2025, 1, 1);
+            // Act
+            var result = await SBOBobService.GetCurrencyRateAsync(currency, date);
+            // Assert
+            Assert.NotNull(result);
         }
     }
 }
