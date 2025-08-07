@@ -1,9 +1,12 @@
 using B1SLayer;
+using Newtonsoft.Json;
 using SAPB1.SLFramework.Abstractions.Interfaces;
 using SAPB1.SLFramework.Abstractions.Models;
 using SAPB1.SLFramework.ServiceLayer;
 using System.Runtime;
+using System.Runtime.Intrinsics.Arm;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace SAPb1.SLFramework.Tests
 {
@@ -15,6 +18,7 @@ namespace SAPb1.SLFramework.Tests
         public ICompanyInfoService CompanyInfoService { get; set; }
         public IServiceLayerQueryService ServiceLayerQueryService { get; set; }
         public ISBOBobService SBOBobService { get; set; }
+        public IServiceLayerRepository<DownPayments> DownPayments { get; set; }
 
 
         public ServiceLayerRepositoryTests()
@@ -28,6 +32,7 @@ namespace SAPb1.SLFramework.Tests
             ServiceLayerRepositoryBp = new ServiceLayerRepository<BusinessPartners>(slConn);
             ServiceLayerRepositoryCountryCode = new ServiceLayerRepository<Countries>(slConn);
             OrdersRepository = new ServiceLayerRepository<Orders>(slConn);
+            DownPayments = new ServiceLayerRepository<DownPayments>(slConn);
 
             CompanyInfoService = new CompanyInfoService(slConn);
 
@@ -35,6 +40,53 @@ namespace SAPb1.SLFramework.Tests
 
             SBOBobService = new SBOBobService(slConn);
         }
+
+
+        [Fact]
+        public async Task PostDownPaymentTest()
+        {
+            // Arrange
+            var downPayment = new DownPayments
+            {
+                DocCurrency = "GEL",
+                CardCode = "175526",
+                DocDate = DateTime.Now,
+                DownPaymentType = SAPB1.SLFramework.Enums.DownPaymentTypeEnum.dptRequest,
+                DocTotal = 1000,
+                DocDueDate = DateTime.Now.AddDays(30),
+                DocumentLines = new List<DocumentLine>
+                {
+                    new DocumentLine
+                    {
+                        ItemCode = "4167",
+                        Quantity = 10,
+                        BaseType = (int)SAPB1.SLFramework.Enums.BoAPARDocumentTypes.bodt_Order,
+                        BaseEntry = 299, // Replace with a valid order DocEntry
+                        BaseLine = 0, // Replace with a valid order line number
+                        PriceAfterVAT = 100,
+                        VatGroup = "VAT1",
+                    }
+                }
+            };
+
+            var options = new JsonSerializerOptions
+            {
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+                Converters =
+                {
+                    new JsonStringEnumConverter()           // ← emit enum names
+                }
+            };
+
+            var json = System.Text.Json.JsonSerializer.Serialize(downPayment, options);
+
+            // Act
+            var result = await DownPayments.AddAsync(downPayment);
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal("C00001", result.CardCode);
+        }
+
 
         [Fact]
         public async Task FirstOrDefaultAsync_ShouldReturnSingleResult()

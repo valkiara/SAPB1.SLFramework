@@ -111,7 +111,7 @@ namespace SAPB1.SLFramework.Abstractions.Models
         public int? LineNum { get; set; }
 
         /// <summary>Document type of the base document (e.g., 17 = Sales Order).</summary>
-        public BoAPARDocumentTypes? BaseType { get; set; }
+        public int? BaseType { get; set; }
 
         /// <summary>Document number of the base document.</summary>
         public int? BaseEntry { get; set; }
