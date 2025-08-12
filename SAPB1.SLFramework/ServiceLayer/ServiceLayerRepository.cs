@@ -45,6 +45,7 @@ namespace SAPB1.SLFramework.ServiceLayer
         public void AddNoContent(T entity)
             => AddAsyncNoContent(entity).GetAwaiter().GetResult();
 
+
         public async Task<T?> GetAsync(object id)
         {
             return await _connection.Request(_resource, id)
@@ -100,6 +101,15 @@ namespace SAPB1.SLFramework.ServiceLayer
                 await _connection.Request(_resource, id)
                              .PatchAsync(entity);
             }
+        }
+
+        public void Delete(object id)
+           => DeleteAsync(id).GetAwaiter().GetResult();
+
+        public async Task DeleteAsync(object id)
+        {
+            await _connection.Request(_resource, id)
+                             .DeleteAsync();
         }
 
         public void Cancel(object id)

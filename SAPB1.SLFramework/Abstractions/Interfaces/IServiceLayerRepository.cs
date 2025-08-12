@@ -61,5 +61,7 @@ namespace SAPB1.SLFramework.Abstractions.Interfaces
         ODataResult<IEnumerable<T>> Query(string rawQuery);
         Task AddAsyncNoContent(T entity);
         void AddNoContent(T entity);
+        void Delete(object id);
+        Task DeleteAsync(object id);
     }
 }
