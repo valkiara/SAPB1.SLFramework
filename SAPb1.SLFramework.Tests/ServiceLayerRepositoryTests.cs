@@ -19,6 +19,7 @@ namespace SAPb1.SLFramework.Tests
         public IServiceLayerQueryService ServiceLayerQueryService { get; set; }
         public ISBOBobService SBOBobService { get; set; }
         public IServiceLayerRepository<DownPayments> DownPayments { get; set; }
+        public IServiceLayerRepository<RSM_BDPM> DPMAccounts { get; set; }
 
 
         public ServiceLayerRepositoryTests()
@@ -37,7 +38,7 @@ namespace SAPb1.SLFramework.Tests
             CompanyInfoService = new CompanyInfoService(slConn);
 
             ServiceLayerQueryService = new ServiceLayerQueryService(slConn);
-
+            DPMAccounts = new ServiceLayerRepository<RSM_BDPM>(slConn);
             SBOBobService = new SBOBobService(slConn);
         }
 
@@ -192,6 +193,15 @@ namespace SAPb1.SLFramework.Tests
             // Act
             var result = await SBOBobService.GetCurrencyRateAsync(currency, date);
             // Assert
+            Assert.NotNull(result);
+        }
+
+
+        [Fact]
+        public void FirstOrDefaultAsync_ShouldReturnObject_When_Enum_IsCondition()
+        {
+            var result = DPMAccounts.FirstOrDefaultAsync(x => x.U_Currency == "USD" && x.U_Status == AreaTypeEnum.Residential).Result;
+
             Assert.NotNull(result);
         }
     }
