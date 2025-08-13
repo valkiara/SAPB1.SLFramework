@@ -2,11 +2,9 @@
 using SAPB1.SLFramework.Abstractions.Attributes;
 using SAPB1.SLFramework.Abstractions.Interfaces;
 using SAPB1.SLFramework.Abstractions.Models;
-using SAPB1.SLFramework.Extensions;
 using SAPB1.SLFramework.Utilities;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Text.Json;
 
 namespace SAPB1.SLFramework.ServiceLayer
 {
@@ -23,133 +21,131 @@ namespace SAPB1.SLFramework.ServiceLayer
         {
             _connection = connection ?? throw new ArgumentNullException(nameof(connection));
 
-            // Use [ServiceLayerResourcePath] if available, fallback to typeof(T).Name
             var attr = typeof(T).GetCustomAttribute<ServiceLayerResourcePathAttribute>();
             _resource = attr?.ResourcePath ?? typeof(T).Name;
         }
 
-        public async Task<T> AddAsync(T entity)
+        #region Helpers
+
+        private SLRequest Req(string resource) => _connection.Request(resource);
+        private SLRequest Req(string resource, object id) => _connection.Request(resource, id);
+
+        private static string EnsureKeyWrapped(object id)
         {
-            return await _connection.Request(_resource).PostAsync<T>(entity);
+            var s = id?.ToString() ?? throw new ArgumentNullException(nameof(id));
+            return s.StartsWith("(") ? s : $"({s})";
         }
 
-        public async Task AddAsyncNoContent(T entity)
-        {
-            await _connection.Request(_resource).PostAsync(entity);
-        }
+        private static string BuildOrderBy(IEnumerable<(Expression<Func<T, object>> expr, bool desc)> items)
+            => ODataOrderByBuilder.ToODataOrderBy(items);
 
+        #endregion
 
-        public T Add(T entity)
-            => AddAsync(entity).GetAwaiter().GetResult();
+        #region Create
 
-        public void AddNoContent(T entity)
-            => AddAsyncNoContent(entity).GetAwaiter().GetResult();
+        public async Task<T> AddAsync(T entity, CancellationToken ct = default)
+            => await Req(_resource).PostAsync<T>(entity, unwrapCollection: true).WaitAsync(ct);
 
+        public async Task AddAsyncNoContent(T entity, CancellationToken ct = default)
+            => await Req(_resource).PostAsync(entity).WaitAsync(ct);
 
-        public async Task<T?> GetAsync(object id)
-        {
-            return await _connection.Request(_resource, id)
-                                     .GetAsync<T>();
-        }
+#pragma warning disable SYSLIB0006
+        [Obsolete("Use AddAsync instead")]
+        public T Add(T entity) => AddAsync(entity).GetAwaiter().GetResult();
 
-        public T? Get(object id)
-            => GetAsync(id).GetAwaiter().GetResult();
+        [Obsolete("Use AddAsyncNoContent instead")]
+        public void AddNoContent(T entity) => AddAsyncNoContent(entity).GetAwaiter().GetResult();
+#pragma warning restore SYSLIB0006
+
+        #endregion
+
+        #region Read (single)
+
+        public async Task<T?> GetAsync(object id, CancellationToken ct = default)
+            => await Req(_resource, id).GetAsync<T>().WaitAsync(ct);
+
+#pragma warning disable SYSLIB0006
+        [Obsolete("Use GetAsync instead")]
+        public T? Get(object id) => GetAsync(id).GetAwaiter().GetResult();
+#pragma warning restore SYSLIB0006
+
+        #endregion
+
+        #region Update (PATCH)
 
         public void Update(object id, string entityJson)
             => UpdateAsync(id, entityJson).GetAwaiter().GetResult();
 
-        public async Task UpdateAsync(object id, string entityJson)
-        {
-            await _connection.Request(_resource, id)
-                             .PatchStringAsync(entityJson);
-        }
+        public async Task UpdateAsync(object id, string entityJson, CancellationToken ct = default)
+            => await Req(_resource, id).PatchStringAsync(entityJson).WaitAsync(ct);
 
-        /// <summary>
-        /// Update by passing a CLR object; it will be serialized to JSON under the covers.
-        /// </summary>
         public void Update(object id, T entity)
-        {
-            // Option A: let Flurl handle serialization
-            UpdateObjectAsync(id, entity).GetAwaiter().GetResult();
-        }
+            => UpdateAsync(id, entity).GetAwaiter().GetResult();
 
-        /// <summary>
-        /// Update by passing a CLR object; it will be serialized to JSON under the covers.
-        /// </summary>
-        public async Task UpdateAsync(object id, T entity)
-        {
-            await UpdateObjectAsync(id, entity);
-        }
+        public async Task UpdateAsync(object id, T entity, CancellationToken ct = default)
+            => await UpdateObjectAsync(id, entity, ct);
 
-        /// <summary>
-        /// Core object-based update; calls Flurl PatchJsonAsync(T).
-        /// </summary>
-        private async Task UpdateObjectAsync(object id, T entity)
+        private async Task UpdateObjectAsync(object id, T entity, CancellationToken ct)
         {
-            // Flurl will serialize 'entity' with System.Text.Json
             if (typeof(T) == typeof(UserFieldsMD))
             {
-                // id should be "TableName='UDT01',FieldID=0"
-                // We build a full resource: "UserFieldsMD(TableName='UDT01',FieldID=0')"
-                string fullResource = $"{_resource}({id})";
-                await _connection
-                      .Request(fullResource)     // exactly UserFieldsMD(TableName='UDT01',FieldID=0)
-                      .PatchAsync(entity);
+                var key = EnsureKeyWrapped(id);
+                await Req($"{_resource}{key}").PatchAsync(entity).WaitAsync(ct);
             }
             else
             {
-                await _connection.Request(_resource, id)
-                             .PatchAsync(entity);
+                await Req(_resource, id).PatchAsync(entity).WaitAsync(ct);
             }
         }
 
-        public void Delete(object id)
-           => DeleteAsync(id).GetAwaiter().GetResult();
+        #endregion
 
-        public async Task DeleteAsync(object id)
-        {
-            await _connection.Request(_resource, id)
-                             .DeleteAsync();
-        }
+        #region Delete / Cancel
 
-        public void Cancel(object id)
-            => CancelAsync(id).GetAwaiter().GetResult();
+        public void Delete(object id) => DeleteAsync(id).GetAwaiter().GetResult();
 
-        public async Task CancelAsync(object id)
-        {
-            await _connection.Request(_resource, id)
-                             .DeleteAsync();
-        }
+        public async Task DeleteAsync(object id, CancellationToken ct = default)
+            => await Req(_resource, id).DeleteAsync().WaitAsync(ct);
 
-        public Task LoginAsync()
-            => _connection.LoginAsync();
+        public void Cancel(object id) => CancelAsync(id).GetAwaiter().GetResult();
 
         /// <summary>
-        /// Returns true if any record of type T satisfies the given OData filter.
+        /// Cancels a marketing document via POST {Resource}({key})/Cancel.
         /// </summary>
-        public async Task<bool> ExistsAsync(Expression<Func<T, bool>> filter)
+        public async Task CancelAsync(object id, CancellationToken ct = default)
         {
-            var filterStr = ODataFilterBuilder.ToODataFilter(filter);
-
-            var response = await _connection
-                                 .Request(_resource)
-                                 .SetQueryParam("$filter", filterStr)
-                                 .SetQueryParam("$top", "1")
-                                 .SetQueryParam("$count", "true")
-                                 .GetAsync<ODataResult<List<T>>>(false)
-                                 .ConfigureAwait(false);
-
-            return response.Count > 0;
+            var key = EnsureKeyWrapped(id);
+            await Req($"{_resource}{key}", "Cancel").PostAsync().WaitAsync(ct);
         }
 
-        public async Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>> filter)
+        #endregion
+
+        #region Simple existence / first / single
+
+        /// <summary>
+        /// Lighter existence check (no $count) – asks for a single minimal field with $top=1.
+        /// </summary>
+        public async Task<bool> ExistsAsync(Expression<Func<T, bool>> filter, CancellationToken ct = default)
         {
             var filterStr = ODataFilterBuilder.ToODataFilter(filter);
-            var result = await _connection.Request(_resource)
-                                          .SetQueryParam("$filter", filterStr)
-                                          .SetQueryParam("$top", "1")
-                                          .GetAsync<ODataResult<List<T>>>(false)
-                                          .ConfigureAwait(false);
+            var res = await Req(_resource)
+                .SetQueryParam("$filter", filterStr)
+                .SetQueryParam("$select", ODataSelectBuilder.MinimalKeySelect<T>())
+                .SetQueryParam("$top", "1")
+                .GetAsync<ODataResult<List<T>>>(unwrapCollection: false)
+                .WaitAsync(ct);
+
+            return (res.Value?.Count ?? 0) > 0;
+        }
+
+        public async Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>> filter, CancellationToken ct = default)
+        {
+            var filterStr = ODataFilterBuilder.ToODataFilter(filter);
+            var result = await Req(_resource)
+                .SetQueryParam("$filter", filterStr)
+                .SetQueryParam("$top", "1")
+                .GetAsync<ODataResult<List<T>>>(false)
+                .WaitAsync(ct);
 
             return result.Value?.FirstOrDefault();
         }
@@ -157,84 +153,75 @@ namespace SAPB1.SLFramework.ServiceLayer
         public T? FirstOrDefault(Expression<Func<T, bool>> filter)
             => FirstOrDefaultAsync(filter).GetAwaiter().GetResult();
 
-        public async Task<T> FirstAsync(Expression<Func<T, bool>> filter)
-        {
-            var entity = await FirstOrDefaultAsync(filter);
-            return entity ?? throw new InvalidOperationException($"No elements match the filter.");
-        }
+        public async Task<T> FirstAsync(Expression<Func<T, bool>> filter, CancellationToken ct = default)
+            => await FirstOrDefaultAsync(filter, ct) ?? throw new InvalidOperationException("No elements match the filter.");
 
         public T First(Expression<Func<T, bool>> filter)
             => FirstAsync(filter).GetAwaiter().GetResult();
 
-        public async Task<T?> SingleOrDefaultAsync(Expression<Func<T, bool>> filter)
+        public async Task<T?> SingleOrDefaultAsync(Expression<Func<T, bool>> filter, CancellationToken ct = default)
         {
             var filterStr = ODataFilterBuilder.ToODataFilter(filter);
-            var result = await _connection.Request(_resource)
-                                          .SetQueryParam("$filter", filterStr)
-                                          .SetQueryParam("$top", "2")
-                                          .GetAsync<ODataResult<List<T>>>(false)
-                                          .ConfigureAwait(false);
+            var result = await Req(_resource)
+                .SetQueryParam("$filter", filterStr)
+                .SetQueryParam("$top", "2")
+                .GetAsync<ODataResult<List<T>>>(false)
+                .WaitAsync(ct);
 
             var list = result.Value;
-            if (list == null || list.Count == 0)
-                return null;
-
-            if (list.Count > 1)
-                throw new InvalidOperationException($"More than one element matches the filter.");
-
-            return list.First();
+            if (list == null || list.Count == 0) return null;
+            if (list.Count > 1) throw new InvalidOperationException("More than one element matches the filter.");
+            return list[0];
         }
 
         public T? SingleOrDefault(Expression<Func<T, bool>> filter)
             => SingleOrDefaultAsync(filter).GetAwaiter().GetResult();
 
-        public async Task<T> SingleAsync(Expression<Func<T, bool>> filter)
-        {
-            var entity = await SingleOrDefaultAsync(filter);
-            return entity ?? throw new InvalidOperationException($"No elements match the filter.");
-        }
+        public async Task<T> SingleAsync(Expression<Func<T, bool>> filter, CancellationToken ct = default)
+            => await SingleOrDefaultAsync(filter, ct) ?? throw new InvalidOperationException("No elements match the filter.");
 
         public T Single(Expression<Func<T, bool>> filter)
             => SingleAsync(filter).GetAwaiter().GetResult();
 
+        #endregion
 
-        public async Task<IEnumerable<T>> SelectAsync(Expression<Func<T, T>> selector)
+        #region Query – basic (one page)
+
+        /// <summary>
+        /// Select specific fields.
+        /// </summary>
+        public async Task<IEnumerable<T>> SelectAsync(Expression<Func<T, T>> selector, CancellationToken ct = default)
         {
             var selectFields = ODataSelectBuilder.ToODataSelect(selector);
+            var result = await Req(_resource)
+                .SetQueryParam("$select", selectFields)
+                .GetAsync<ODataResult<List<T>>>(false)
+                .WaitAsync(ct);
 
-            var result = await _connection.Request(_resource)
-                                          .SetQueryParam("$select", selectFields)
-                                          .GetAsync<ODataResult<IEnumerable<T>>>(false);
-
-            return result.Value ?? Enumerable.Empty<T>();
+            return result.Value ?? new List<T>();
         }
 
+        /// <summary>
+        /// Query with filter / select / order / paging (returns one page).
+        /// </summary>
         public async Task<IEnumerable<T>> QueryAsync(
-         Expression<Func<T, bool>>? filter = null,
-         Expression<Func<T, T>>? select = null,
-         IEnumerable<(Expression<Func<T, object>> expr, bool desc)>? orderBy = null,
-         int? page = null,
-         int? pageSize = null)
-            {
-            var request = _connection.Request(_resource);
+            Expression<Func<T, bool>>? filter = null,
+            Expression<Func<T, T>>? select = null,
+            IEnumerable<(Expression<Func<T, object>> expr, bool desc)>? orderBy = null,
+            int? page = null,
+            int? pageSize = null,
+            CancellationToken ct = default)
+        {
+            var request = Req(_resource);
 
             if (filter is not null)
-            {
-                var filterStr = ODataFilterBuilder.ToODataFilter(filter);
-                request = request.SetQueryParam("$filter", filterStr);
-            }
+                request = request.SetQueryParam("$filter", ODataFilterBuilder.ToODataFilter(filter));
 
             if (select is not null)
-            {
-                var selectStr = ODataSelectBuilder.ToODataSelect(select);
-                request = request.SetQueryParam("$select", selectStr);
-            }
+                request = request.SetQueryParam("$select", ODataSelectBuilder.ToODataSelect(select));
 
             if (orderBy is not null && orderBy.Any())
-            {
-                var orderByStr = ODataOrderByBuilder.ToODataOrderBy(orderBy);
-                request = request.SetQueryParam("$orderby", orderByStr);
-            }
+                request = request.SetQueryParam("$orderby", BuildOrderBy(orderBy));
 
             if (page.HasValue && pageSize.HasValue)
             {
@@ -246,37 +233,201 @@ namespace SAPB1.SLFramework.ServiceLayer
                 request = request.SetQueryParam("$top", pageSize.Value.ToString());
             }
 
-            return await request.GetAsync<IEnumerable<T>>();
+            var res = await request.GetAsync<ODataResult<List<T>>>(false).WaitAsync(ct);
+            return res.Value ?? new List<T>();
         }
 
+        /// <summary>
+        /// Convenience overload for a single order by.
+        /// </summary>
+        public Task<IEnumerable<T>> QueryAsync(
+            Expression<Func<T, bool>>? filter = null,
+            Expression<Func<T, T>>? select = null,
+            Expression<Func<T, object>>? orderBy = null,
+            bool desc = false,
+            int? page = null,
+            int? pageSize = null,
+            CancellationToken ct = default)
+        {
+            var tuple = orderBy is null ? null : new[] { (orderBy, desc) };
+            return QueryAsync(filter, select, tuple, page, pageSize, ct);
+        }
 
-        public async Task<ODataResult<IEnumerable<T>>> QueryAsync(string rawQuery)
+        /// <summary>
+        /// Raw query string (keeps @odata.count and @odata.nextLink if present).
+        /// </summary>
+        public async Task<ODataResult<IEnumerable<T>>> QueryAsync(string rawQuery, CancellationToken ct = default)
         {
             if (string.IsNullOrWhiteSpace(rawQuery))
                 throw new ArgumentException("Query string must not be null or empty.", nameof(rawQuery));
 
-            var request = _connection.Request($"{_resource}?{rawQuery}");
-            return await request.GetAsync<ODataResult<IEnumerable<T>>>(false);
+            return await Req($"{_resource}?{rawQuery}")
+                .GetAsync<ODataResult<IEnumerable<T>>>(false)
+                .WaitAsync(ct);
         }
 
         public ODataResult<IEnumerable<T>> Query(string rawQuery)
-        {
-            return QueryAsync(rawQuery).GetAwaiter().GetResult();
-        }
+            => QueryAsync(rawQuery).GetAwaiter().GetResult();
 
+        #endregion
 
-        public async Task<long> CountAsync(Expression<Func<T, bool>>? filter = null)
+        #region Query – paging helpers
+
+        /// <summary>
+        /// Returns a single page with Count and NextLink preserved.
+        /// </summary>
+        public async Task<ODataResult<List<T>>> QueryPageAsync(
+            Expression<Func<T, bool>>? filter = null,
+            Expression<Func<T, T>>? select = null,
+            IEnumerable<(Expression<Func<T, object>> expr, bool desc)>? orderBy = null,
+            int? top = null,
+            int? skip = null,
+            CancellationToken ct = default)
         {
-            var request = _connection.Request(_resource).SetQueryParam("$count", "true");
+            var req = Req(_resource).SetQueryParam("$count", "true");
 
             if (filter is not null)
+                req = req.SetQueryParam("$filter", ODataFilterBuilder.ToODataFilter(filter));
+
+            if (select is not null)
+                req = req.SetQueryParam("$select", ODataSelectBuilder.ToODataSelect(select));
+
+            if (orderBy?.Any() == true)
+                req = req.SetQueryParam("$orderby", BuildOrderBy(orderBy));
+
+            if (top is not null) req = req.SetQueryParam("$top", top.Value.ToString());
+            if (skip is not null) req = req.SetQueryParam("$skip", skip.Value.ToString());
+
+            return await req.GetAsync<ODataResult<List<T>>>(false).WaitAsync(ct);
+        }
+
+        /// <summary>
+        /// Follows an @odata.nextLink returned by Service Layer (absolute or relative).
+        /// </summary>
+        public async Task<ODataResult<List<T>>> NextPageAsync(string nextLink, CancellationToken ct = default)
+        {
+            var qIndex = nextLink.IndexOf('?');
+            if (qIndex < 0)
+                throw new ArgumentException("Invalid @odata.nextLink (no query part found).", nameof(nextLink));
+
+            var rawQuery = nextLink[(qIndex + 1)..]; // everything after '?'
+            return await Req($"{_resource}?{rawQuery}").GetAsync<ODataResult<List<T>>>(false).WaitAsync(ct);
+        }
+
+        /// <summary>
+        /// Streams all pages using @odata.nextLink. Server-driven paging friendly.
+        /// </summary>
+        public async IAsyncEnumerable<T> QueryAllAsync(
+            Expression<Func<T, bool>>? filter = null,
+            Expression<Func<T, T>>? select = null,
+            IEnumerable<(Expression<Func<T, object>> expr, bool desc)>? orderBy = null,
+            int pageSize = 200,
+            [System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken ct = default)
+        {
+            var page = await QueryPageAsync(filter, select, orderBy, top: pageSize, skip: null, ct);
+            if (page.Value != null)
+                foreach (var item in page.Value) yield return item;
+
+            while (!string.IsNullOrEmpty(page.NextLink))
             {
-                var filterStr = ODataFilterBuilder.ToODataFilter(filter);
-                request = request.SetQueryParam("$filter", filterStr);
+                ct.ThrowIfCancellationRequested();
+                page = await NextPageAsync(page.NextLink!, ct);
+                if (page.Value == null || page.Value.Count == 0) yield break;
+                foreach (var item in page.Value) yield return item;
+            }
+        }
+
+        #endregion
+
+        #region Count
+
+        /// <summary>
+        /// Returns count using $count endpoint or inline count when needed.
+        /// </summary>
+        public async Task<long> CountAsync(Expression<Func<T, bool>>? filter = null, CancellationToken ct = default)
+        {
+            if (filter is null)
+            {
+                // Use "{resource}/$count" and SLRequest.GetStringAsync()
+                var s = await Req($"{_resource}/$count").GetStringAsync().WaitAsync(ct);
+                return long.TryParse(s, out var n) ? n : 0;
             }
 
-            var result = await request.GetAsync<ODataResult<IEnumerable<T>>>(false);
-            return result.Count ?? 0;
+            // Filtered count via inline $count=true (keeps compatibility with SL quirks)
+            var filterStr = ODataFilterBuilder.ToODataFilter(filter);
+            var res = await Req(_resource)
+                .SetQueryParam("$filter", filterStr)   // this is an SLRequestExtensions method
+                .SetQueryParam("$count", "true")
+                .GetAsync<ODataResult<List<T>>>(false)
+                .WaitAsync(ct);
+
+            return res.Count ?? 0;
         }
+
+
+        #endregion
+
+        #region Raw GET helpers
+
+        public async Task<string> GetRawStringAsync(object id, CancellationToken ct = default)
+            => await Req(_resource, id).GetStringAsync().WaitAsync(ct);
+
+        public async Task<byte[]> GetRawBytesAsync(object id, CancellationToken ct = default)
+            => await Req(_resource, id).GetBytesAsync().WaitAsync(ct);
+
+        public async Task<Stream> GetRawStreamAsync(object id, CancellationToken ct = default)
+            => await Req(_resource, id).GetStreamAsync().WaitAsync(ct);
+
+        #endregion
+
+        #region Raw POST/PATCH/PUT helpers
+
+        public async Task<TOut> PostAsync<TOut>(object data, CancellationToken ct = default)
+            => await Req(_resource).PostAsync<TOut>(data, unwrapCollection: true).WaitAsync(ct);
+
+        public async Task<TOut> PostStringAsync<TOut>(string json, CancellationToken ct = default)
+            => await Req(_resource).PostStringAsync<TOut>(json, unwrapCollection: true).WaitAsync(ct);
+
+        public async Task PostAsync(object data, CancellationToken ct = default)
+            => await Req(_resource).PostAsync(data).WaitAsync(ct);
+
+        public async Task<string> PostReceiveStringAsync(CancellationToken ct = default)
+            => await Req(_resource).PostReceiveStringAsync().WaitAsync(ct);
+
+        public async Task PostStringAsync(string json, CancellationToken ct = default)
+            => await Req(_resource).PostStringAsync(json).WaitAsync(ct);
+
+        public async Task PatchStringAsync(object id, string json, CancellationToken ct = default)
+            => await Req(_resource, id).PatchStringAsync(json).WaitAsync(ct);
+
+        public async Task PutAsync(object id, object data, CancellationToken ct = default)
+            => await Req(_resource, id).PutAsync(data).WaitAsync(ct);
+
+        public async Task PutStringAsync(object id, string json, CancellationToken ct = default)
+            => await Req(_resource, id).PutStringAsync(json).WaitAsync(ct);
+
+        #endregion
+
+        #region File (PATCH multipart)
+
+        /// <summary>
+        /// Patch with file (e.g., attachments) to the resource instance.
+        /// </summary>
+        public async Task PatchWithFileAsync(object id, string fileName, byte[] bytes, CancellationToken ct = default)
+            => await Req(_resource, id).PatchWithFileAsync(fileName, bytes).WaitAsync(ct);
+
+        public async Task PatchWithFileAsync(object id, string fileName, Stream stream, CancellationToken ct = default)
+            => await Req(_resource, id).PatchWithFileAsync(fileName, stream).WaitAsync(ct);
+
+        public async Task PatchWithFileAsync(object id, string path, CancellationToken ct = default)
+            => await Req(_resource, id).PatchWithFileAsync(path).WaitAsync(ct);
+
+        #endregion
+
+        #region Session
+
+        public Task LoginAsync() => _connection.LoginAsync();
+
+        #endregion
     }
 }

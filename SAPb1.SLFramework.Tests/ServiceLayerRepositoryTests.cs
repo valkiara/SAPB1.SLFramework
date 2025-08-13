@@ -7,6 +7,7 @@ using System.Runtime;
 using System.Runtime.Intrinsics.Arm;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Threading.Tasks;
 
 namespace SAPb1.SLFramework.Tests
 {
@@ -204,5 +205,22 @@ namespace SAPb1.SLFramework.Tests
 
             Assert.NotNull(result);
         }
+
+
+        [Fact]
+        public async Task ShouldReturnAllSalesOrders()
+        {
+            var list = new List<Orders>();
+
+            await foreach (var o in OrdersRepository.QueryAllAsync(
+                               x => x.DocumentStatus == SAPB1.SLFramework.Enums.BoStatus.bost_Open))
+            {
+                list.Add(o);
+            }
+
+            Assert.NotEmpty(list);
+        }
+
+
     }
 }
