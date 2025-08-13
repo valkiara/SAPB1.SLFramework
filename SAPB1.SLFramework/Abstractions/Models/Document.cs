@@ -52,10 +52,10 @@ namespace SAPB1.SLFramework.Abstractions.Models
         /// <summary>
         /// Sets or returns the customer or vendor code.
         /// </summary>
-        public required string CardCode { get; set; }
+        public string? CardCode { get; set; }
 
 
-        public required string DocCurrency { get; set; }
+        public string? DocCurrency { get; set; }
 
         /// <summary>
         /// Sets or returns the customer or vendor name.
@@ -65,19 +65,19 @@ namespace SAPB1.SLFramework.Abstractions.Models
         /// <summary>
         /// Sets or returns the document posting date.
         /// </summary>
-        public DateTimeOffset DocDate { get; set; } = DateTimeOffset.Now;
+        public DateTimeOffset? DocDate { get; set; } 
 
 
         /// <summary>
         /// Sets or returns the document due date (for example, Delivery Date in sales orders, Value Date in invoices, Valid To in quotations, and so on).
         /// </summary>
-        public DateTimeOffset DocDueDate { get; set; } = DateTimeOffset.Now;
+        public DateTimeOffset? DocDueDate { get; set; }
 
 
         /// <summary>
         /// Sets or returns the date for the tax calculation or payment.
         /// </summary>
-        public DateTimeOffset TaxDate { get; set; } = DateTimeOffset.Now;
+        public DateTimeOffset? TaxDate { get; set; } 
 
 
         /// <summary>
@@ -98,8 +98,8 @@ namespace SAPB1.SLFramework.Abstractions.Models
         /// <summary>
         /// Returns the Document Line objects.
         /// </summary>
-        public IList<DocumentLine> DocumentLines { get; set; } = [];
-        public IList<DownPaymentToDraw> DownPaymentsToDraw { get; set; } = [];
+        public IList<DocumentLine>? DocumentLines { get; set; } = [];
+        public IList<DownPaymentToDraw>? DownPaymentsToDraw { get; set; } = [];
     }
 
     /// <summary>
@@ -120,13 +120,13 @@ namespace SAPB1.SLFramework.Abstractions.Models
         public int? BaseLine { get; set; }
 
         /// <summary>Item code. Must be unique. (Required)</summary>
-        public required string ItemCode { get; set; }
+        public string? ItemCode { get; set; }
 
         /// <summary>Item name/description.</summary>
         public string? ItemDescription { get; set; }
 
         /// <summary>Ordered quantity.</summary>
-        public double Quantity { get; set; }
+        public double? Quantity { get; set; }
 
         /// <summary>Remaining quantity not yet delivered or invoiced.</summary>
         public double? RemainingOpenQuantity { get; set; }
