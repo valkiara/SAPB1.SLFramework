@@ -21,6 +21,7 @@ namespace SAPb1.SLFramework.Tests
         public ISBOBobService SBOBobService { get; set; }
         public IServiceLayerRepository<DownPayments> DownPayments { get; set; }
         public IServiceLayerRepository<RSM_BDPM> DPMAccounts { get; set; }
+        public IServiceLayerRepository<JournalEntries> JournalEntries { get; set; }
         public ICashFlowLineItemsService CashFlowLineItemsService { get; set; }
 
 
@@ -43,6 +44,7 @@ namespace SAPb1.SLFramework.Tests
             DPMAccounts = new ServiceLayerRepository<RSM_BDPM>(slConn);
             CashFlowLineItemsService = new CashFlowLineItemsService(slConn);
             SBOBobService = new SBOBobService(slConn);
+            JournalEntries = new ServiceLayerRepository<JournalEntries>(slConn);
         }
 
 
@@ -235,6 +237,13 @@ namespace SAPb1.SLFramework.Tests
             {
                 Console.WriteLine($"LineItemID: {item.LineItemID}, LineItemName: {item.LineItemName}");
             }
+        }
+
+        [Fact]
+        public async Task ShouldReturnJournalEntries()
+        {
+            var aa = await JournalEntries.GetAsync(23778);
+
         }
 
     }
