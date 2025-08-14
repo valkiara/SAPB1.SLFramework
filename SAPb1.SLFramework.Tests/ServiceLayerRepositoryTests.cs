@@ -21,6 +21,7 @@ namespace SAPb1.SLFramework.Tests
         public ISBOBobService SBOBobService { get; set; }
         public IServiceLayerRepository<DownPayments> DownPayments { get; set; }
         public IServiceLayerRepository<RSM_BDPM> DPMAccounts { get; set; }
+        public ICashFlowLineItemsService CashFlowLineItemsService { get; set; }
 
 
         public ServiceLayerRepositoryTests()
@@ -40,6 +41,7 @@ namespace SAPb1.SLFramework.Tests
 
             ServiceLayerQueryService = new ServiceLayerQueryService(slConn);
             DPMAccounts = new ServiceLayerRepository<RSM_BDPM>(slConn);
+            CashFlowLineItemsService = new CashFlowLineItemsService(slConn);
             SBOBobService = new SBOBobService(slConn);
         }
 
@@ -221,6 +223,19 @@ namespace SAPb1.SLFramework.Tests
             Assert.NotEmpty(list);
         }
 
+        [Fact]
+        public async Task CashFlowLineItemsService_ShouldReturnList()
+        {
+            // Act
+            var result = await CashFlowLineItemsService.ListAsync();
+            // Assert
+            Assert.NotNull(result);
+            Assert.NotEmpty(result);
+            foreach (var item in result)
+            {
+                Console.WriteLine($"LineItemID: {item.LineItemID}, LineItemName: {item.LineItemName}");
+            }
+        }
 
     }
 }

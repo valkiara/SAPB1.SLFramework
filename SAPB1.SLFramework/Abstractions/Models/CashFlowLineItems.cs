@@ -8,7 +8,7 @@ namespace SAPB1.SLFramework.Abstractions.Models
         public int? Drawer { get; set; }
         public int? Level { get; set; }
         public int LineItemID { get; set; }
-        public int LineItemName { get; set; }
+        public string? LineItemName { get; set; }
         public int? ParentArticle { get; set; }
     }
 }
