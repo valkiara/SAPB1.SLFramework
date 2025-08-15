@@ -20,7 +20,7 @@ namespace SAPB1.SLFramework.ServiceLayer
         public ServiceLayerRepository(SLConnection connection)
         {
             _connection = connection ?? throw new ArgumentNullException(nameof(connection));
-            
+
             var attr = typeof(T).GetCustomAttribute<ServiceLayerResourcePathAttribute>();
             _resource = attr?.ResourcePath ?? typeof(T).Name;
         }
@@ -318,24 +318,34 @@ namespace SAPB1.SLFramework.ServiceLayer
         /// Streams all pages using @odata.nextLink. Server-driven paging friendly.
         /// </summary>
         public async IAsyncEnumerable<T> QueryAllAsync(
-            Expression<Func<T, bool>>? filter = null,
-            Expression<Func<T, T>>? select = null,
-            IEnumerable<(Expression<Func<T, object>> expr, bool desc)>? orderBy = null,
-            int pageSize = 200,
-            [System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken ct = default)
+        Expression<Func<T, bool>>? filter = null,
+        Expression<Func<T, T>>? select = null,
+        IEnumerable<(Expression<Func<T, object>> expr, bool desc)>? orderBy = null,
+        int pageSize = 200,
+        [System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken ct = default)
         {
-            var page = await QueryPageAsync(filter, select, orderBy, top: pageSize, skip: null, ct);
-            if (page.Value != null)
-                foreach (var item in page.Value) yield return item;
+            var skip = 0;
 
-            while (!string.IsNullOrEmpty(page.NextLink))
+            while (true)
             {
                 ct.ThrowIfCancellationRequested();
-                page = await NextPageAsync(page.NextLink!, ct);
-                if (page.Value == null || page.Value.Count == 0) yield break;
-                foreach (var item in page.Value) yield return item;
+
+                var page = await QueryPageAsync(filter, select, orderBy, top: pageSize, skip: skip, ct);
+                if (page.Value == null || page.Value.Count == 0)
+                    yield break;
+
+                foreach (var item in page.Value)
+                    yield return item;
+
+                // If we got fewer than pageSize, we're done
+                if (page.Value.Count < pageSize)
+                    yield break;
+
+                // Otherwise, advance
+                skip += page.Value.Count; // or: skip += pageSize;
             }
         }
+
 
         #endregion
 

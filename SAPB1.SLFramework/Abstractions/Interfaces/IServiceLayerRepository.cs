@@ -115,7 +115,7 @@ namespace SAPB1.SLFramework.Abstractions.Interfaces
             Expression<Func<T, bool>>? filter = null,
             Expression<Func<T, T>>? select = null,
             IEnumerable<(Expression<Func<T, object>> expr, bool desc)>? orderBy = null,
-            int pageSize = 200,
+            int pageSize = 20,
             CancellationToken ct = default);
 
         // Raw GET helpers
