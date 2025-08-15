@@ -194,7 +194,7 @@ namespace SAPB1.SLFramework.Abstractions.Models
                 public int? JDTLineId { get; set; }
 
                 /// <summary>Payment means / method code (SL returns a code; keep as string unless you map to an enum). (PaymentMeans)</summary>
-                public string? PaymentMeans { get; set; }
+                public PaymentMeansTypeEnum? PaymentMeans { get; set; }
             }
         }
     }
