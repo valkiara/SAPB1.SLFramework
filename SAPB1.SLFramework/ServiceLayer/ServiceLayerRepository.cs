@@ -20,7 +20,7 @@ namespace SAPB1.SLFramework.ServiceLayer
         public ServiceLayerRepository(SLConnection connection)
         {
             _connection = connection ?? throw new ArgumentNullException(nameof(connection));
-
+            
             var attr = typeof(T).GetCustomAttribute<ServiceLayerResourcePathAttribute>();
             _resource = attr?.ResourcePath ?? typeof(T).Name;
         }
