@@ -23,6 +23,7 @@ namespace SAPb1.SLFramework.Tests
         public IServiceLayerRepository<RSM_BDPM> DPMAccounts { get; set; }
         public IServiceLayerRepository<JournalEntries> JournalEntries { get; set; }
         public IServiceLayerRepository<ChartOfAccounts> ChartofAccounts { get; set; }
+        public IServiceLayerRepository<IncomingPayments> IncomingPayments { get; set; }
         public ICashFlowLineItemsService CashFlowLineItemsService { get; set; }
 
 
@@ -47,6 +48,7 @@ namespace SAPb1.SLFramework.Tests
             SBOBobService = new SBOBobService(slConn);
             JournalEntries = new ServiceLayerRepository<JournalEntries>(slConn);
             ChartofAccounts = new ServiceLayerRepository<ChartOfAccounts>(slConn);
+            IncomingPayments = new ServiceLayerRepository<IncomingPayments>(slConn);
         }
 
 
@@ -256,6 +258,20 @@ namespace SAPb1.SLFramework.Tests
             var list = new List<ChartOfAccounts>();
 
             await foreach (var o in ChartofAccounts.QueryAllAsync())
+            {
+                list.Add(o);
+            }
+
+            Assert.NotEmpty(list);
+        }
+
+
+        [Fact]
+        public async Task ShouldReturnIncomingPayments()
+        {
+            var list = new List<IncomingPayments>();
+
+            await foreach (var o in IncomingPayments.QueryAllAsync())
             {
                 list.Add(o);
             }
