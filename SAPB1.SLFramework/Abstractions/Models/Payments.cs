@@ -34,7 +34,7 @@ namespace SAPB1.SLFramework.Abstractions.Models
 
         public string? DocCurrency { get; set; } // 3 chars
 
-        public decimal? DocRate { get; set; }
+        public double? DocRate { get; set; }
 
         public BoYesNoEnum? LocalCurrency { get; set; } // DiffCurr
         public BoYesNoEnum? ApplyVAT { get; set; }      // ApplyVAT
@@ -51,11 +51,11 @@ namespace SAPB1.SLFramework.Abstractions.Models
         // ——— Cash & accounts ———
         public string? CashAccount { get; set; } // CashAcct (15)
 
-        public decimal? CashSum { get; set; } // mandatory
+        public double? CashSum { get; set; } // mandatory
 
-        public decimal? CashSumFC { get; set; }
+        public double? CashSumFC { get; set; }
 
-        public decimal? CashSumSys { get; set; } // CheckSumSy (per docs)
+        public double? CashSumSys { get; set; } // CheckSumSy (per docs)
 
         public string? CheckAccount { get; set; } // 15
         public string? ControlAccount { get; set; } // BpAct (OACT)
@@ -70,16 +70,16 @@ namespace SAPB1.SLFramework.Abstractions.Models
 
         public string? TransferReference { get; set; } // 27
 
-        public decimal? TransferSum { get; set; } // mandatory
+        public double? TransferSum { get; set; } // mandatory
 
-        public decimal? TransferRealAmount { get; set; } // RU loc (TfrRealAmt)
+        public double? TransferRealAmount { get; set; } // RU loc (TfrRealAmt)
 
         // ——— Bank charges ———
-        public decimal? BankChargeAmount { get; set; }   // BcgSum
+        public double? BankChargeAmount { get; set; }   // BcgSum
 
-        public decimal? BankChargeAmountInFC { get; set; } // BcgSumFC
+        public double? BankChargeAmountInFC { get; set; } // BcgSumFC
 
-        public decimal? BankChargeAmountInSC { get; set; } // BcgSumSy
+        public double? BankChargeAmountInSC { get; set; } // BcgSumSy
 
         // ——— Pay-to bank (outgoing) ———
         public string? PayToBankCode { get; set; }     // PBnkCode (30)
@@ -91,12 +91,12 @@ namespace SAPB1.SLFramework.Abstractions.Models
         public string? BoeAccount { get; set; }       // BoeAcc (15)
         public string? BillOfExchangeAgent { get; set; } // BoeAgent (OAGP)
 
-        public decimal? BillOfExchangeAmount { get; set; } // BoeSum (LC)
+        public double? BillOfExchangeAmount { get; set; } // BoeSum (LC)
 
-        public decimal? BillOfExchangeAmountFC { get; set; } // BoeSumFc
+        public double? BillOfExchangeAmountFC { get; set; } // BoeSumFc
 
         
-        public decimal? BillOfExchangeAmountSC { get; set; } // BoeSumSc
+        public double? BillOfExchangeAmountSC { get; set; } // BoeSumSc
 
         /// <summary>Status of BoE (map to your enum if available).</summary>
         public string? BillofExchangeStatus { get; set; } // BoBoeStatus
@@ -105,26 +105,26 @@ namespace SAPB1.SLFramework.Abstractions.Models
         public string? WTAccount { get; set; } // WtAccount (15)
 
         
-        public decimal? WTAmount { get; set; }   // WtSum (LC)
+        public double? WTAmount { get; set; }   // WtSum (LC)
 
         
-        public decimal? WTAmountFC { get; set; } // WtSumFrgn
+        public double? WTAmountFC { get; set; } // WtSumFrgn
 
         
-        public decimal? WTAmountSC { get; set; } // WtSumSys
+        public double? WTAmountSC { get; set; } // WtSumSys
 
         
-        public decimal? WtBaseSum { get; set; }   // WtBaseSum
+        public double? WtBaseSum { get; set; }   // WtBaseSum
 
         
-        public decimal? WtBaseSumFC { get; set; } // WtBaseSumF
+        public double? WtBaseSumFC { get; set; } // WtBaseSumF
 
         
-        public decimal? WtBaseSumSC { get; set; } // WtSumSys (per list)
+        public double? WtBaseSumSC { get; set; } // WtSumSys (per list)
 
         public string? WTCode { get; set; } // 4
         
-        public decimal? WTTaxableAmount { get; set; } // WtBaseAmnt
+        public double? WTTaxableAmount { get; set; } // WtBaseAmnt
 
         // ——— VAT ———
         public string? TaxGroup { get; set; } // VatGroup (8)
@@ -170,13 +170,13 @@ namespace SAPB1.SLFramework.Abstractions.Models
 
         // ——— Under/Over payment ———
         
-        public decimal? UnderOverpaymentdifference { get; set; } // UndOvDiff
+        public double? UnderOverpaymentdifference { get; set; } // UndOvDiff
 
         
-        public decimal? UnderOverpaymentdiffFC { get; set; }
+        public double? UnderOverpaymentdiffFC { get; set; }
 
         
-        public decimal? UnderOverpaymentdiffSC { get; set; } // UndOvDiffS
+        public double? UnderOverpaymentdiffSC { get; set; } // UndOvDiffS
 
         // ——— Lines / children ———
         public IList<PaymentAccount>? PaymentAccounts { get; set; }
@@ -195,7 +195,7 @@ namespace SAPB1.SLFramework.Abstractions.Models
     {
         public string? AccountCode { get; set; }
         
-        public decimal? SumPaid { get; set; }
+        public double? SumPaid { get; set; }
     }
 
     public class PaymentInvoice
@@ -203,11 +203,11 @@ namespace SAPB1.SLFramework.Abstractions.Models
         public int DocEntry { get; set; }
         public BoRcptInvTypes? InvoiceType { get; set; }
         
-        public decimal? PaidSum { get; set; }
+        public double? PaidSum { get; set; }
         
-        public decimal? SumApplied { get; set; }
+        public double? SumApplied { get; set; }
         
-        public decimal? AppliedFC { get; set; }
+        public double? AppliedFC { get; set; }
         public int? LineNum { get; set; }
     }
 
@@ -217,7 +217,7 @@ namespace SAPB1.SLFramework.Abstractions.Models
         public string? BankCode { get; set; }
         public string? Accountt { get; set; }
         
-        public decimal? CheckSum { get; set; }
+        public double? CheckSum { get; set; }
         public DateTimeOffset? DueDate { get; set; }
         public string? CountryCode { get; set; }
         public string? Branch { get; set; }
@@ -228,7 +228,7 @@ namespace SAPB1.SLFramework.Abstractions.Models
     {
         public int? CreditCard { get; set; }     // Credit card code (OCRC)
         public string? CreditAcct { get; set; }  // G/L account for card
-        public decimal? CreditSum { get; set; }
+        public double? CreditSum { get; set; }
         public string? VoucherNum { get; set; }
         public DateTimeOffset? CardValidUntil { get; set; }
         public string? OwnerIdNum { get; set; }
@@ -238,7 +238,7 @@ namespace SAPB1.SLFramework.Abstractions.Models
     public class CashFlowAssignment
     {
         public PaymentMeansTypeEnum? PaymentMeans { get; set; }
-        public decimal? AmountLC { get; set; }
-        public decimal? AmountFC { get; set; }
+        public double? AmountLC { get; set; }
+        public double? AmountFC { get; set; }
     }
 }
