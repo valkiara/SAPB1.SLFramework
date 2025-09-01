@@ -24,6 +24,7 @@ namespace SAPb1.SLFramework.Tests
         public IServiceLayerRepository<JournalEntries> JournalEntries { get; set; }
         public IServiceLayerRepository<ChartOfAccounts> ChartofAccounts { get; set; }
         public IServiceLayerRepository<IncomingPayments> IncomingPayments { get; set; }
+        public IServiceLayerRepository<Items> Items { get; set; }
         public ICashFlowLineItemsService CashFlowLineItemsService { get; set; }
 
 
@@ -49,8 +50,16 @@ namespace SAPb1.SLFramework.Tests
             JournalEntries = new ServiceLayerRepository<JournalEntries>(slConn);
             ChartofAccounts = new ServiceLayerRepository<ChartOfAccounts>(slConn);
             IncomingPayments = new ServiceLayerRepository<IncomingPayments>(slConn);
+            Items = new ServiceLayerRepository<Items>(slConn);
         }
 
+
+        [Fact]
+        public async Task GetItemByItemCode()
+        {
+            var item = await Items.FirstOrDefaultAsync(x => x.ItemCode == "ITM0001");
+            Assert.NotNull(item);
+        }
 
         [Fact]
         public async Task PostDownPaymentTest()
