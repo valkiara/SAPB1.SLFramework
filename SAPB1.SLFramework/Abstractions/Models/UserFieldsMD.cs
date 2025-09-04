@@ -1,4 +1,6 @@
-﻿namespace SAPB1.SLFramework.Abstractions.Models
+﻿using SAPB1.SLFramework.Enums;
+
+namespace SAPB1.SLFramework.Abstractions.Models
 {
     public class UserFieldsMD
     {
@@ -97,6 +99,16 @@
         public ICollection<ValidValueMD>? ValidValuesMD { get; set; }
 
 
+        private static bool IsLinkedSystemObjectEquivalent(
+            UDFLinkedSystemObjectTypesEnum? a,
+            UDFLinkedSystemObjectTypesEnum? b)
+        {
+            // Treat null as None
+            var na = a ?? UDFLinkedSystemObjectTypesEnum.ulNone;
+            var nb = b ?? UDFLinkedSystemObjectTypesEnum.ulNone;
+            return na == nb;
+        }
+
         public bool IsDifferentFrom(UserFieldsMD other)
         {
             if (other == null) return true;
@@ -112,9 +124,10 @@
                 (shouldCompareEditSize && this.EditSize != other.EditSize) ||
                 this.Mandatory != other.Mandatory ||
                 !StringsEqual(this.LinkedUDO, other.LinkedUDO) ||
-                this.LinkedSystemObject != other.LinkedSystemObject ||
+                !IsLinkedSystemObjectEquivalent(this.LinkedSystemObject, other.LinkedSystemObject) ||  // <-- changed
                 !AreValidValuesEqual(this.ValidValuesMD, other.ValidValuesMD);
         }
+
 
         private static bool StringsEqual(string? a, string? b)
         {
