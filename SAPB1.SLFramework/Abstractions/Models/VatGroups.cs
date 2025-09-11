@@ -72,7 +72,7 @@ namespace SapB1.Models
         public string? Name { get; set; }
 
         /// <summary>Field: NonDedct — Non-deductible tax percentage.</summary>
-        public decimal? NonDeduct { get; set; }
+        public double? NonDeduct { get; set; }
 
         /// <summary>Field: NonDedAcc — G/L for non-deductible tax (length 15, FK to ChartOfAccounts).</summary>
         public string? NonDeductAcc { get; set; }
@@ -143,12 +143,12 @@ namespace SapB1.Models
         /// <summary>
         /// Field: Rate — VAT percentage for the group.
         /// </summary>
-        public decimal Rate { get; set; }
+        public double Rate { get; set; }
 
         /// <summary>
         /// Field: EquVatPr — Equalization tax percentage (if applicable).
         /// </summary>
-        public decimal? EqualizationTax { get; set; }
+        public double? EqualizationTax { get; set; }
 
         /// <summary>
         /// DATEV code (country-specific).
