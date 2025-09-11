@@ -1,5 +1,6 @@
 using B1SLayer;
 using Newtonsoft.Json;
+using SapB1.Models;
 using SAPB1.SLFramework.Abstractions.Interfaces;
 using SAPB1.SLFramework.Abstractions.Models;
 using SAPB1.SLFramework.ServiceLayer;
@@ -25,6 +26,7 @@ namespace SAPb1.SLFramework.Tests
         public IServiceLayerRepository<ChartOfAccounts> ChartofAccounts { get; set; }
         public IServiceLayerRepository<IncomingPayments> IncomingPayments { get; set; }
         public IServiceLayerRepository<Items> Items { get; set; }
+        public IServiceLayerRepository<VatGroups> VatGroups { get; set; }
         public ICashFlowLineItemsService CashFlowLineItemsService { get; set; }
 
 
@@ -51,6 +53,21 @@ namespace SAPb1.SLFramework.Tests
             ChartofAccounts = new ServiceLayerRepository<ChartOfAccounts>(slConn);
             IncomingPayments = new ServiceLayerRepository<IncomingPayments>(slConn);
             Items = new ServiceLayerRepository<Items>(slConn);
+            VatGroups = new ServiceLayerRepository<VatGroups>(slConn);
+        }
+
+
+        [Fact]
+        public async Task GetVatGroups()
+        {
+            var list = new List<VatGroups>();
+
+            await foreach (var o in VatGroups.QueryAllAsync())
+            {
+                list.Add(o);
+            }
+
+            Assert.NotEmpty(list);
         }
 
 
