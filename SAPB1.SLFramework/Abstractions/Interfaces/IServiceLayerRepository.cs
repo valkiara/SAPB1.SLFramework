@@ -139,5 +139,7 @@ namespace SAPB1.SLFramework.Abstractions.Interfaces
         Task PatchWithFileAsync(object id, string fileName, byte[] bytes, CancellationToken ct = default);
         Task PatchWithFileAsync(object id, string fileName, Stream stream, CancellationToken ct = default);
         Task PatchWithFileAsync(object id, string path, CancellationToken ct = default);
+        Task<ODataResult<IEnumerable<T>>> QueryAsync(IDictionary<string, string>? query = null);
+        ODataResult<IEnumerable<T>> Query(IDictionary<string, string>? query = null);
     }
 }
