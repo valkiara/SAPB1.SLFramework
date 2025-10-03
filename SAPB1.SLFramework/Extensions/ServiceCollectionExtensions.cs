@@ -20,7 +20,17 @@ namespace SAPB1.SLFramework.Extensions
         public static IServiceCollection AddSapB1Framework(this IServiceCollection services, IConfiguration configuration)
         {
             // 1. Bind SAP B1 settings
-            services.Configure<SapB1Settings>(configuration.GetSection("SapB1"));
+            services.Configure<SapB1Settings>(options =>
+            {
+                var sapB1Section = configuration.GetSection("SapB1");
+                var sboSection = configuration.GetSection("SBO");
+
+                IConfigurationSection sectionToUse =
+                    sapB1Section.Exists() ? sapB1Section : sboSection;
+
+                sectionToUse.Bind(options);
+            });
+
 
             // 2. Register SLConnection as singleton using bound settings
             services.AddSingleton(sp =>
