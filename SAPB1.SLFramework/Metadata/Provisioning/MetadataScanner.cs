@@ -4,27 +4,29 @@ using SAPB1.SLFramework.Abstractions.Models;
 
 namespace SAPB1.SLFramework.Metadata.Provisioning
 {
-    /// <summary>
-    /// Scans assemblies for UDT, UDF, and SapTable attributes to produce metadata definitions.
-    /// </summary>
     public static class MetadataScanner
     {
         /// <summary>
-        /// Scans loaded assemblies for classes decorated with UdtAttribute
-        /// and returns corresponding UserTablesMD definitions.
+        /// Optional: limit scanning to assemblies that match this predicate.
+        /// Example: asm => asm.GetName().Name!.StartsWith("SAPB1.", StringComparison.Ordinal)
+        /// or      asm => asm == typeof(SomeKnownType).Assembly
         /// </summary>
-        public static IEnumerable<UserTablesMD> ScanUserTables(IServiceProvider serviceProvider)
+        public static Func<Assembly, bool>? AssemblyFilter { get; set; }
+
+        /// <summary>
+        /// Plug in your logger if you want diagnostics from LoaderExceptions.
+        /// </summary>
+        public static Action<string>? Log { get; set; }
+
+        public static IEnumerable<UserTablesMD> ScanUserTables(IServiceProvider _)
         {
             var tables = new List<UserTablesMD>();
 
-            // Find all types that have [Udt]
-            var typesWithUdt = AppDomain.CurrentDomain.GetAssemblies()
-                                .SelectMany(a => a.GetTypes())
-                                .Where(t => t.GetCustomAttribute<UdtAttribute>() != null);
-
-            foreach (var type in typesWithUdt)
+            foreach (var type in GetCandidateTypes(t =>
+                    t.GetCustomAttribute<UdtAttribute>(inherit: true) != null))
             {
-                var udtAttr = type.GetCustomAttribute<UdtAttribute>()!;
+                var udtAttr = type.GetCustomAttribute<UdtAttribute>(inherit: true)!;
+
                 tables.Add(new UserTablesMD
                 {
                     TableName = udtAttr.TableName,
@@ -38,54 +40,32 @@ namespace SAPB1.SLFramework.Metadata.Provisioning
             return tables;
         }
 
-        /// <summary>
-        /// Scans loaded assemblies for properties decorated with UdfAttribute
-        /// on types marked with either UdtAttribute (UDT) or SapTableAttribute (system table),
-        /// and returns corresponding UserFieldsMD definitions.
-        /// </summary>
-        public static IEnumerable<UserFieldsMD> ScanUserFields(IServiceProvider serviceProvider)
+        public static IEnumerable<UserFieldsMD> ScanUserFields(IServiceProvider _)
         {
             var fields = new List<UserFieldsMD>();
 
-            // Grab all types that have either [Udt] or [SapTable]
-            var types = AppDomain.CurrentDomain.GetAssemblies()
-                             .SelectMany(a => a.GetTypes())
-                             .Where(t => t.GetCustomAttribute<UdtAttribute>() != null
-                                      || t.GetCustomAttribute<SapTableAttribute>() != null);
-
-            foreach (var type in types)
+            foreach (var type in GetCandidateTypes(t =>
+                    t.GetCustomAttribute<UdtAttribute>(inherit: true) != null ||
+                    t.GetCustomAttribute<SapTableAttribute>(inherit: true) != null))
             {
-                // If the class has [Udt], that takes precedence.
-                var udtAttr = type.GetCustomAttribute<UdtAttribute>();
-                // Otherwise, if it has [SapTable], we use that
-                var sapAttr = type.GetCustomAttribute<SapTableAttribute>();
+                var udtAttr = type.GetCustomAttribute<UdtAttribute>(inherit: true);
+                var sapAttr = type.GetCustomAttribute<SapTableAttribute>(inherit: true);
 
-                // Determine which TableName to use:
-                string tableName;
-                if (udtAttr != null)
-                {
-                    tableName = $"@{udtAttr.TableName}";
-                }
-                else
-                {
-                    // sapAttr is guaranteed non‐null here (by the Where() above)
-                    tableName = sapAttr!.TableName;
-                }
+                var tableName = udtAttr != null ? $"@{udtAttr.TableName}" : sapAttr!.TableName;
 
-                // Now find all properties on this type that have [Udf]
-                var udfProps = type.GetProperties()
-                                   .Where(p => p.GetCustomAttribute<UdfAttribute>() != null);
-
-                foreach (var prop in udfProps)
+                var props = SafeGetProperties(type);
+                foreach (var prop in props)
                 {
-                    var udfAttr = prop.GetCustomAttribute<UdfAttribute>()!;
+                    var udfAttr = prop.GetCustomAttribute<UdfAttribute>(inherit: true);
+                    if (udfAttr is null) continue;
+
+                    var validValues = prop.GetCustomAttributes<ValidValueAttribute>(inherit: true)
+                        .Select(v => new ValidValueMD { Value = v.Value, Description = v.Description })
+                        .ToArray();
 
                     fields.Add(new UserFieldsMD
                     {
-                        // Use the system table name or UDT name from above
                         TableName = tableName,
-
-                        // Copy over all the Udf‐specific metadata
                         FieldID = udfAttr.FieldID,
                         Name = udfAttr.Name,
                         Type = udfAttr.Type,
@@ -98,18 +78,79 @@ namespace SAPB1.SLFramework.Metadata.Provisioning
                         EditSize = udfAttr.EditSize,
                         LinkedUDO = udfAttr.LinkedUDO,
                         LinkedSystemObject = udfAttr.LinkedSystemObject,
-                        ValidValuesMD = prop.GetCustomAttributes<ValidValueAttribute>()
-                            .Select(v => new ValidValueMD
-                            {
-                                Value = v.Value,
-                                Description = v.Description
-                            })
-                            .ToArray()
+                        ValidValuesMD = validValues
                     });
                 }
             }
 
             return fields;
+        }
+
+        // ---------- helpers ----------
+
+        private static IEnumerable<Type> GetCandidateTypes(Func<Type, bool> predicate)
+        {
+            var asms = AppDomain.CurrentDomain.GetAssemblies()
+                          .Where(a => (AssemblyFilter == null) || AssemblyFilter(a));
+
+            foreach (var asm in asms)
+            {
+                Type[] types = SafeGetTypes(asm);
+                foreach (var t in types)
+                {
+                    if (t is null) continue;
+                    if (t.IsAbstract || t.IsGenericTypeDefinition) continue;
+
+                    if (predicate(t))
+                        yield return t;
+                }
+            }
+        }
+
+        private static Type[] SafeGetTypes(Assembly asm)
+        {
+            try
+            {
+                return asm.GetTypes();
+            }
+            catch (ReflectionTypeLoadException ex)
+            {
+                // Log each loader exception once for diagnostics
+                if (Log != null)
+                {
+                    Log($"[MetadataScanner] Partial type load from '{asm.FullName}'. " +
+                        $"Loaded: {ex.Types?.Count(t => t != null) ?? 0}. " +
+                        $"Errors: {ex.LoaderExceptions?.Length ?? 0}.");
+
+                    if (ex.LoaderExceptions != null)
+                    {
+                        foreach (var le in ex.LoaderExceptions)
+                            Log($"  - {le.GetType().Name}: {le.Message}");
+                    }
+                }
+
+                // Return the types that did load
+                return ex.Types?.Where(t => t != null).ToArray() ?? Array.Empty<Type>();
+            }
+            catch (Exception ex)
+            {
+                Log?.Invoke($"[MetadataScanner] Failed to read types from '{asm.FullName}': {ex.Message}");
+                return Array.Empty<Type>();
+            }
+        }
+
+        private static IEnumerable<PropertyInfo> SafeGetProperties(Type t)
+        {
+            try
+            {
+                // DeclaredOnly avoids inherited duplicates; add Instance/Public as needed
+                return t.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly);
+            }
+            catch (Exception ex)
+            {
+                Log?.Invoke($"[MetadataScanner] Failed to read properties of '{t.FullName}': {ex.Message}");
+                return Array.Empty<PropertyInfo>();
+            }
         }
     }
 }

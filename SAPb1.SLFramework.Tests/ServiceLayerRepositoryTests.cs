@@ -27,15 +27,16 @@ namespace SAPb1.SLFramework.Tests
         public IServiceLayerRepository<IncomingPayments> IncomingPayments { get; set; }
         public IServiceLayerRepository<Items> Items { get; set; }
         public IServiceLayerRepository<VatGroups> VatGroups { get; set; }
+        public IServiceLayerRepository<StockTransfers> StockTransfers { get; set; }
         public ICashFlowLineItemsService CashFlowLineItemsService { get; set; }
 
 
         public ServiceLayerRepositoryTests()
         {
-            //var slConn = new SLConnection("https://srv-pl4:50000/b1s/v2/", "SalesDB", "beka", "1234");
+            var slConn = new SLConnection("https://srv-pl4:50000/b1s/v2/", "SalesDB", "beka", "1234");
 
 
-            var slConn = new SLConnection("https://10.132.10.103:50000/b1s/v2/", "BATUMI_RIVIERA_TEST", "manager", "Aa123456!");
+            //var slConn = new SLConnection("https://10.132.10.103:50000/b1s/v2/", "BATUMI_RIVIERA_TEST", "manager", "Aa123456!");
 
 
             ServiceLayerRepositoryBp = new ServiceLayerRepository<BusinessPartners>(slConn);
@@ -54,6 +55,21 @@ namespace SAPb1.SLFramework.Tests
             IncomingPayments = new ServiceLayerRepository<IncomingPayments>(slConn);
             Items = new ServiceLayerRepository<Items>(slConn);
             VatGroups = new ServiceLayerRepository<VatGroups>(slConn);
+            StockTransfers = new ServiceLayerRepository<StockTransfers>(slConn);
+        }
+
+
+        [Fact]
+        public async Task GetStockTransfers()
+        {
+            var list = new List<StockTransfers>();
+
+            await foreach (var o in StockTransfers.QueryAllAsync())
+            {
+                list.Add(o);
+            }
+
+            Assert.NotEmpty(list);
         }
 
 
