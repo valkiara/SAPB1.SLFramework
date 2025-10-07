@@ -1,0 +1,99 @@
+﻿using SAPB1.SLFramework.Abstractions.Enums;
+using SAPB1.SLFramework.Enums;
+
+namespace SAPB1.SLFramework.Abstractions.Models
+{
+    public partial class Warehouses
+    {
+        public string? AddressName2 { get; set; }
+        public string? AddressName3 { get; set; }
+        public string? AddressType { get; set; }
+        public BoYesNoEnum? AllowUseTax { get; set; }
+        public BoDocWhsAutoIssueMethod? AutoAllocOnIssue { get; set; }
+        public AutoAllocOnReceiptMethodEnum? AutoAllocOnReceipt { get; set; }
+        public string? BinLocCodeSeparator { get; set; }
+        public string? Block { get; set; }
+        public string? BuildingFloorRoom { get; set; }
+        public int? BusinessPlaceID { get; set; }
+        public string? City { get; set; }
+        public string? CostInflationAccount { get; set; }
+        public string? CostInflationOffsetAccount { get; set; }
+        public string? CostOfGoodsSold { get; set; }
+        public string? Country { get; set; }
+        public string? County { get; set; }
+        public string? DecreaseGLAccount { get; set; }
+        public string? DecreasingAccount { get; set; }
+        public int? DefaultBin { get; set; }
+        public BoYesNoEnum? DefaultBinEnforced { get; set; }
+        public BoYesNoEnum? DropShip { get; set; }
+        public BoYesNoEnum? EnableBinLocations { get; set; }
+        public BoYesNoEnum? EnableReceivingBinLocations { get; set; }
+        public string? EUExpensesAccount { get; set; }
+        public string? EUPurchaseCreditAcc { get; set; }
+        public string? EURevenuesAccount { get; set; }
+        public string? ExchangeRateDifferencesAccount { get; set; }
+        public BoYesNoEnum? Excisable { get; set; }
+        public string? ExemptedCredits { get; set; }
+        public string? ExemptRevenuesAccount { get; set; }
+        public string? ExpenseAccount { get; set; }
+        public string? ExpenseOffsetingAct { get; set; }
+        public string? ExpensesClearingAccount { get; set; }
+        public string? External { get; set; }
+        public string? FederalTaxID { get; set; }
+        public string? ForeignExpensesAccount { get; set; }
+        public string? ForeignPurchaseCreditAcc { get; set; }
+        public string? ForeignRevenuesAcc { get; set; }
+        public string? GlobalLocationNumber { get; set; }
+        public string? GoodsClearingAcc { get; set; }
+        public BoYesNoEnum? Inactive { get; set; }
+        public string? IncreaseGLAccount { get; set; }
+        public string? IncreasingAcc { get; set; }
+        public int? InternalKey { get; set; }
+        public string? InventoryOffsetProfitAndLossAccount { get; set; }
+        public string? LegalText { get; set; }
+        public string? Location { get; set; }
+        public BoYesNoEnum? ManageSerialAndBatchNumbers { get; set; }
+        public string? NegativeInventoryAdjustmentAccount { get; set; }
+        public BoYesNoEnum? Nettable { get; set; }
+        public string? PriceDifferencesAccount { get; set; }
+        public string? PurchaseAccount { get; set; }
+        public string? PurchaseBalanceAccount { get; set; }
+        public string? PurchaseCreditAcc { get; set; }
+        public string? PurchaseOffsetAccount { get; set; }
+        public string? PurchaseReturningAccount { get; set; }
+        public BoYesNoEnum? ReceiveUpToMaxQuantity { get; set; }
+        public BoYesNoEnum? ReceiveUpToMaxWeight { get; set; }
+        public ReceivingUpToMethodEnum? ReceiveUpToMethod { get; set; }
+        public ReceivingBinLocationsMethodEnum? ReceivingBinLocationsBy { get; set; }
+        public BoYesNoEnum? RestrictReceiptToEmptyBinLocation { get; set; }
+        public string? ReturningAccount { get; set; }
+        public string? RevenuesAccount { get; set; }
+        public string? SalesCreditAcc { get; set; }
+        public string? SalesCreditEUAcc { get; set; }
+        public string? SalesCreditForeignAcc { get; set; }
+        public string? ShippedGoodsAccount { get; set; }
+        public string? Shipper { get; set; }
+        public string? State { get; set; }
+        public string? StockAccount { get; set; }
+        public string? StockInflationAdjustAccount { get; set; }
+        public string? StockInflationOffsetAccount { get; set; }
+        public string? StockInTransitAccount { get; set; }
+        public string? Storekeeper { get; set; }
+        public string? Street { get; set; }
+        public string? StreetNo { get; set; }
+        public string? TaxGroup { get; set; }
+        public string? TaxOffice { get; set; }
+        public string? TransfersAcc { get; set; }
+        public string? VarianceAccount { get; set; }
+        public string? VATInRevenueAccount { get; set; }
+        public string? WarehouseCode { get; set; }
+        public string? WarehouseName { get; set; }
+        public string? WHIncomingCenvatAccount { get; set; }
+        public string? WHOutgoingCenvatAccount { get; set; }
+        public string? WHShipToName { get; set; }
+        public string? WIPMaterialAccount { get; set; }
+        public string? WIPMaterialVarianceAccount { get; set; }
+        public string? WipOffsetProfitAndLossAccount { get; set; }
+        public string? ZipCode { get; set; }
+    }
+}

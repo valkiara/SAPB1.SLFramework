@@ -1,4 +1,5 @@
 ﻿using SAPB1.SLFramework.Abstractions.Attributes;
+using SAPB1.SLFramework.Enums;
 
 namespace SAPB1.SLFramework.Abstractions.Models
 {
@@ -7,7 +8,7 @@ namespace SAPB1.SLFramework.Abstractions.Models
     {
         public IncomingPayments()
         {
-            DocObjectCode = Enums.BoPaymentsObjectType.bopot_IncomingPayments;
+            DocObjectCode = BoPaymentsObjectType.bopot_IncomingPayments;
         }
     }
 }

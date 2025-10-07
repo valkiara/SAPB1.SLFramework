@@ -16,7 +16,7 @@ namespace SAPB1.SLFramework.Abstractions.Models
         /// Sets or returns the data type, which describes the nature of the data, of the specified field . 
         /// Field name: TypeID.
         /// </summary>
-        public Enums.BoFieldTypes? Type { get; set; }
+        public BoFieldTypes? Type { get; set; }
 
 
         /// <summary>
@@ -36,7 +36,7 @@ namespace SAPB1.SLFramework.Abstractions.Models
         /// <summary>
         /// Returns or set the field sub-type, which specifies a specific format of the data type. 
         /// </summary>
-        public Enums.BoFldSubTypes? SubType { get; set; }
+        public BoFldSubTypes? SubType { get; set; }
 
         /// <summary>
         /// Sets or returns a linked user table name, so that the user field will be used as a foreign key in the TableName. 
@@ -78,7 +78,7 @@ namespace SAPB1.SLFramework.Abstractions.Models
         /// Sets or returns a valid value that determines wether or not this User Field is mandatory in SAP Business One. 
         /// Field name: Sys.
         /// </summary>
-        public Enums.BoYesNoEnum? Mandatory { get; set; }
+        public BoYesNoEnum? Mandatory { get; set; }
 
 
         /// <summary>
@@ -91,7 +91,7 @@ namespace SAPB1.SLFramework.Abstractions.Models
         /// <summary>
         /// Links to an existing system object of SAP Business One.
         /// </summary>
-        public Enums.UDFLinkedSystemObjectTypesEnum? LinkedSystemObject { get; set; }
+        public UDFLinkedSystemObjectTypesEnum? LinkedSystemObject { get; set; }
 
         /// <summary>
         /// Returns the ValidValuesMD object. 
@@ -113,7 +113,7 @@ namespace SAPB1.SLFramework.Abstractions.Models
         {
             if (other == null) return true;
 
-            bool shouldCompareEditSize = this.Type is Enums.BoFieldTypes.db_Alpha or Enums.BoFieldTypes.db_Numeric;
+            bool shouldCompareEditSize = this.Type is BoFieldTypes.db_Alpha or BoFieldTypes.db_Numeric;
 
             return
                 this.Type != other.Type ||
@@ -135,10 +135,10 @@ namespace SAPB1.SLFramework.Abstractions.Models
                 || string.Equals(a, b, StringComparison.OrdinalIgnoreCase);
         }
 
-        private static bool IsSubTypeEquivalent(Enums.BoFldSubTypes? a, Enums.BoFldSubTypes? b)
+        private static bool IsSubTypeEquivalent(BoFldSubTypes? a, BoFldSubTypes? b)
         {
-            bool isNoneOrNull(Enums.BoFldSubTypes? val) =>
-                val == null || val == Enums.BoFldSubTypes.st_None;
+            bool isNoneOrNull(BoFldSubTypes? val) =>
+                val == null || val == BoFldSubTypes.st_None;
 
             return isNoneOrNull(a) && isNoneOrNull(b) || a == b;
         }

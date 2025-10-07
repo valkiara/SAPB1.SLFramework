@@ -266,12 +266,12 @@ namespace SAPB1.SLFramework.ServiceLayer
                 .WaitAsync(ct);
         }
 
-        public ODataResult<IEnumerable<T>> Query(string rawQuery)
-            => QueryAsync(rawQuery).GetAwaiter().GetResult();
+        public ODataResult<IEnumerable<T>> Query(string rawQuery, CancellationToken ct = default)
+            => QueryAsync(rawQuery, ct).GetAwaiter().GetResult();
 
 
 
-        public Task<ODataResult<IEnumerable<T>>> QueryAsync(IDictionary<string, string>? query = null)
+        public Task<ODataResult<IEnumerable<T>>> QueryAsync(IDictionary<string, string>? query = null, CancellationToken ct = default)
         {
             var request = Req(_resource);
 
@@ -285,8 +285,8 @@ namespace SAPB1.SLFramework.ServiceLayer
             return request.GetAsync<ODataResult<IEnumerable<T>>>(false);
         }
 
-        public ODataResult<IEnumerable<T>> Query(IDictionary<string, string>? query = null)
-            => QueryAsync(query).GetAwaiter().GetResult();
+        public ODataResult<IEnumerable<T>> Query(IDictionary<string, string>? query = null, CancellationToken ct = default)
+            => QueryAsync(query, ct).GetAwaiter().GetResult();
         #endregion
 
         #region Query – paging helpers

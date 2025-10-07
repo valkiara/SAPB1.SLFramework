@@ -16,16 +16,13 @@ namespace SAPB1.SLFramework.Abstractions.Interfaces
         Task<T> AddAsync(T entity, CancellationToken ct = default);
         Task AddAsyncNoContent(T entity, CancellationToken ct = default);
 
-        [System.Obsolete("Use AddAsync instead")]
         T Add(T entity);
 
-        [System.Obsolete("Use AddAsyncNoContent instead")]
         void AddNoContent(T entity);
 
         // Read (single)
         Task<T?> GetAsync(object id, CancellationToken ct = default);
 
-        [System.Obsolete("Use GetAsync instead")]
         T? Get(object id);
 
         // Update (PATCH)
@@ -36,12 +33,10 @@ namespace SAPB1.SLFramework.Abstractions.Interfaces
         Task UpdateAsync(object id, T entity, CancellationToken ct = default);
 
         // Delete / Cancel
-        [System.Obsolete("Use DeleteAsync instead")]
         void Delete(object id);
 
         Task DeleteAsync(object id, CancellationToken ct = default);
 
-        [System.Obsolete("Use CancelAsync instead")]
         void Cancel(object id);
 
         /// <summary>POST {Resource}({key})/Cancel for marketing documents.</summary>
@@ -57,19 +52,15 @@ namespace SAPB1.SLFramework.Abstractions.Interfaces
 
         // First/Single
         Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>> filter, CancellationToken ct = default);
-        [System.Obsolete("Use FirstOrDefaultAsync instead")]
         T? FirstOrDefault(Expression<Func<T, bool>> filter);
 
         Task<T> FirstAsync(Expression<Func<T, bool>> filter, CancellationToken ct = default);
-        [System.Obsolete("Use FirstAsync instead")]
         T First(Expression<Func<T, bool>> filter);
 
         Task<T?> SingleOrDefaultAsync(Expression<Func<T, bool>> filter, CancellationToken ct = default);
-        [System.Obsolete("Use SingleOrDefaultAsync instead")]
         T? SingleOrDefault(Expression<Func<T, bool>> filter);
 
         Task<T> SingleAsync(Expression<Func<T, bool>> filter, CancellationToken ct = default);
-        [System.Obsolete("Use SingleAsync instead")]
         T Single(Expression<Func<T, bool>> filter);
 
         // Select (projection)
@@ -97,8 +88,7 @@ namespace SAPB1.SLFramework.Abstractions.Interfaces
         // Raw OData query (preserves @odata.count/@odata.nextLink)
         Task<ODataResult<IEnumerable<T>>> QueryAsync(string rawQuery, CancellationToken ct = default);
 
-        [System.Obsolete("Use QueryAsync(rawQuery, ct) instead")]
-        ODataResult<IEnumerable<T>> Query(string rawQuery);
+        ODataResult<IEnumerable<T>> Query(string rawQuery, CancellationToken ct = default);
 
         // Paging helpers
         Task<ODataResult<List<T>>> QueryPageAsync(
@@ -139,7 +129,7 @@ namespace SAPB1.SLFramework.Abstractions.Interfaces
         Task PatchWithFileAsync(object id, string fileName, byte[] bytes, CancellationToken ct = default);
         Task PatchWithFileAsync(object id, string fileName, Stream stream, CancellationToken ct = default);
         Task PatchWithFileAsync(object id, string path, CancellationToken ct = default);
-        Task<ODataResult<IEnumerable<T>>> QueryAsync(IDictionary<string, string>? query = null);
-        ODataResult<IEnumerable<T>> Query(IDictionary<string, string>? query = null);
+        Task<ODataResult<IEnumerable<T>>> QueryAsync(IDictionary<string, string>? query = null, CancellationToken ct = default);
+        ODataResult<IEnumerable<T>> Query(IDictionary<string, string>? query = null, CancellationToken ct = default);
     }
 }

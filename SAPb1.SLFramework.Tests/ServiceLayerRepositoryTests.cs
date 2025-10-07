@@ -28,6 +28,7 @@ namespace SAPb1.SLFramework.Tests
         public IServiceLayerRepository<Items> Items { get; set; }
         public IServiceLayerRepository<VatGroups> VatGroups { get; set; }
         public IServiceLayerRepository<StockTransfers> StockTransfers { get; set; }
+        public IServiceLayerRepository<Warehouses> Warehouses { get; set; }
         public ICashFlowLineItemsService CashFlowLineItemsService { get; set; }
 
 
@@ -55,8 +56,23 @@ namespace SAPb1.SLFramework.Tests
             IncomingPayments = new ServiceLayerRepository<IncomingPayments>(slConn);
             Items = new ServiceLayerRepository<Items>(slConn);
             VatGroups = new ServiceLayerRepository<VatGroups>(slConn);
+            Warehouses = new ServiceLayerRepository<Warehouses>(slConn);
             StockTransfers = new ServiceLayerRepository<StockTransfers>(slConn);
         }
+
+        [Fact]
+        public async Task GetWarehouses()
+        {
+            var list = new List<Warehouses>();
+
+            await foreach (var o in Warehouses.QueryAllAsync())
+            {
+                list.Add(o);
+            }
+
+            Assert.NotEmpty(list);
+        }
+
 
 
         [Fact]

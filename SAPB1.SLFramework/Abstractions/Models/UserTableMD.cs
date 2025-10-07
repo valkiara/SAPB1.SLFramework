@@ -1,4 +1,6 @@
-﻿namespace SAPB1.SLFramework.Abstractions.Models
+﻿using SAPB1.SLFramework.Enums;
+
+namespace SAPB1.SLFramework.Abstractions.Models
 {
     public class UserTablesMD
     {
@@ -20,11 +22,11 @@
         /// Sets or returns a valid value of BoUTBTableType type that specifies the type of the user table.
         /// Field name: ObjectType.
         /// </summary>
-        public Enums.BoUTBTableType TableType { get; set; }
+        public BoUTBTableType TableType { get; set; }
         /// <summary>
         /// property Archivable 
         /// </summary>
-        public Enums.BoYesNoEnum Archivable { get; set; }
+        public BoYesNoEnum Archivable { get; set; }
         /// <summary>
         /// property ArchiveDateField 
         /// </summary>
@@ -37,7 +39,7 @@
             return
                 !StringsEqual(this.TableDescription, other.TableDescription) ||
                 this.Archivable != other.Archivable ||
-                (this.Archivable == Enums.BoYesNoEnum.tYES && !StringsEqual(this.ArchiveDateField, other.ArchiveDateField));
+                (this.Archivable == BoYesNoEnum.tYES && !StringsEqual(this.ArchiveDateField, other.ArchiveDateField));
         }
 
         private static bool StringsEqual(string? a, string? b)
@@ -49,7 +51,7 @@
 
         public bool IsValidForUpdate()
         {
-            return Archivable != Enums.BoYesNoEnum.tYES || !string.IsNullOrWhiteSpace(ArchiveDateField);
+            return Archivable != BoYesNoEnum.tYES || !string.IsNullOrWhiteSpace(ArchiveDateField);
         }
 
     }
