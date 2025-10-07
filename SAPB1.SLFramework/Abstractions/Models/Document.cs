@@ -98,8 +98,8 @@ namespace SAPB1.SLFramework.Abstractions.Models
         /// <summary>
         /// Returns the Document Line objects.
         /// </summary>
-        public IList<DocumentLine>? DocumentLines { get; set; } = [];
-        public IList<DownPaymentToDraw>? DownPaymentsToDraw { get; set; } = [];
+        public virtual IList<DocumentLine>? DocumentLines { get; set; } = [];
+        public virtual IList<DownPaymentToDraw>? DownPaymentsToDraw { get; set; } = [];
     }
 
     /// <summary>

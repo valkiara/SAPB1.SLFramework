@@ -7,9 +7,8 @@ namespace SAPB1.SLFramework.Abstractions.Models
     [SapTable("OITM")]
     public class Items
     {
-        // Mandatory core
-        public required string ItemCode { get; set; }           // len 20
-        public required string ItemName { get; set; }           // len 200
+        public string? ItemCode { get; set; }           // len 20
+        public string? ItemName { get; set; }           // len 200
 
         // AR/AP tax codes
         public string? ArTaxCode { get; set; }                  // TaxCodeAR len 8
@@ -51,7 +50,7 @@ namespace SAPB1.SLFramework.Abstractions.Models
         public string? ItemType { get; set; }                   // ItemType (DI string flag often 'I','L','T')
         public string? ItemCountryOrg { get; set; }             // len 3
         public string? ForeignName { get; set; }                // FrgnName len 200
-        public string? CommodityClassification { get; set; }    // CommClass
+        public int? CommodityClassification { get; set; }    // CommClass
         public int? MaterialGroup { get; set; }              // MatGrp (FK to OMGP)
         public BoMaterialTypes? MaterialType { get; set; }         // MatType
         public int? Manufacturer { get; set; }               // FK code
@@ -174,8 +173,8 @@ namespace SAPB1.SLFramework.Abstractions.Models
         // Weights / volumes (inventory & units)
         public decimal? InventoryWeight { get; set; }
         public decimal? InventoryWeight1 { get; set; }
-        public string? InventoryWeightUnit { get; set; }
-        public string? InventoryWeightUnit1 { get; set; }
+        public int? InventoryWeightUnit { get; set; }
+        public int? InventoryWeightUnit1 { get; set; }
 
         public decimal? SalesUnitWeight { get; set; }
         public decimal? SalesUnitWeight1 { get; set; }
