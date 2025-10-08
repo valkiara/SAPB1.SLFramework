@@ -182,7 +182,7 @@ namespace SAPB1.SLFramework.Abstractions.Models
         public int? BaseLine { get; set; }
 
         /// <summary>Base doc type (InvBaseDocTypeEnum). Field: BaseType</summary>
-        public int? BaseType { get; set; }
+        public InvBaseDocTypeEnum? BaseType { get; set; }
 
         /// <summary>Parent DocEntry. Field: DocEntry</summary>
         public int? DocEntry { get; set; }
