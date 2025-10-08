@@ -158,8 +158,6 @@ namespace SAPB1.SLFramework.Abstractions.Models
         /// <summary>Last update date</summary>
         public DateTime? UpdateDate { get; set; }
 
-        /// <summary>User-defined fields bag</summary>
-        public Dictionary<string, object?>? UserFields { get; set; }
 
         /// <summary>VAT registration number</summary>
         public string? VATRegNum { get; set; }
@@ -314,9 +312,6 @@ namespace SAPB1.SLFramework.Abstractions.Models
 
         /// <summary>Pick list info for the line (child).</summary>
         public List<PickListLink>? PickLists { get; set; }
-
-        /// <summary>User-defined fields bag.</summary>
-        public Dictionary<string, object?>? UserFields { get; set; }
     }
 
     // -------- Minimal child models (expand as needed) --------
@@ -326,7 +321,6 @@ namespace SAPB1.SLFramework.Abstractions.Models
         public string? SerialNumber { get; set; }
         public double? Quantity { get; set; } // usually 1 for serial-managed items
         public DateTime? ExpiryDate { get; set; }
-        public Dictionary<string, object?>? UserFields { get; set; }
     }
 
     public class BatchNumberRow
@@ -334,7 +328,6 @@ namespace SAPB1.SLFramework.Abstractions.Models
         public string? BatchNumber { get; set; }
         public double? Quantity { get; set; }
         public DateTime? ExpiryDate { get; set; }
-        public Dictionary<string, object?>? UserFields { get; set; }
     }
 
     public class BinAllocationRow
@@ -343,7 +336,6 @@ namespace SAPB1.SLFramework.Abstractions.Models
         public int? BinAbsEntry { get; set; }
         public double? Quantity { get; set; }
         public string? WarehouseCode { get; set; }
-        public Dictionary<string, object?>? UserFields { get; set; }
     }
 
     public class PickListLink
@@ -351,7 +343,6 @@ namespace SAPB1.SLFramework.Abstractions.Models
         public int? PickListId { get; set; }
         public int? PickListLineId { get; set; }
         public double? PickedQuantity { get; set; }
-        public Dictionary<string, object?>? Extras { get; set; }
     }
 
     /// <summary>
@@ -364,6 +355,5 @@ namespace SAPB1.SLFramework.Abstractions.Models
         public string? Carrier { get; set; }
         public string? PlaceOfSupply { get; set; }
         public string? Comments { get; set; }
-        public Dictionary<string, object?>? Extras { get; set; }
     }
 }
