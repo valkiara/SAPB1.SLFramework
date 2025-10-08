@@ -215,7 +215,7 @@ namespace SAPB1.SLFramework.Abstractions.Models
         public double? UnitsOfMeasurment { get; set; }
 
         /// <summary>Use base units? Field: UseBaseUn</summary>
-        public bool? UseBaseUnits { get; set; }
+        public BoYesNoEnum? UseBaseUnits { get; set; }
 
         /// <summary>Line number. Field: LineNum</summary>
         public int? LineNum { get; set; }
