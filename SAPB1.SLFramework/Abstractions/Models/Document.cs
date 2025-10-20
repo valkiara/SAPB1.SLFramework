@@ -45,6 +45,11 @@ namespace SAPB1.SLFramework.Abstractions.Models
         public DownPaymentTypeEnum? DownPaymentType { get; set; }
 
         /// <summary>
+        /// This enables to create a sub document with a separate series number. For example, creating an exempt invoice.
+        /// </summary>
+        public BoDocumentSubType? DocumentSubType { get; set; }
+
+        /// <summary>
         /// Sets or returns the business place ID assigned to a marketing document (such as, invoice).
         /// </summary>
         public int? BPL_IDAssignedToInvoice { get; set; }
