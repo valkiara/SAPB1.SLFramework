@@ -19,6 +19,14 @@ namespace SAPB1.SLFramework.Abstractions.Models
         /// </summary>
         public BoObjectTypes? DocObjectCode { get; set; }
 
+        /// <summary>
+        /// Determines whether or not this document is a Reserve Invoice, invoice that can be drawn to a delivery.
+        /// Field name: isIns.
+        /// Reserve Invoices allow issuing invoices for warehouse items without deducting the items from the inventory (SAP Business One creates a journal entry without creating an inventory entry).
+        //Reserve Invoices refer only to item invoices.
+        /// </summary>
+        public BoYesNoEnum? ReserveInvoice { get; set; }
+
 
         public BoDocumentTypes? DocType { get; set; }
 
