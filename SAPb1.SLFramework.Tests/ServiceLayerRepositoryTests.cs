@@ -29,6 +29,7 @@ namespace SAPb1.SLFramework.Tests
         public IServiceLayerRepository<VatGroups> VatGroups { get; set; }
         public IServiceLayerRepository<StockTransfers> StockTransfers { get; set; }
         public IServiceLayerRepository<Warehouses> Warehouses { get; set; }
+        public IServiceLayerRepository<CreditNotes> CreditNotes { get; set; }
         public ICashFlowLineItemsService CashFlowLineItemsService { get; set; }
 
 
@@ -57,8 +58,16 @@ namespace SAPb1.SLFramework.Tests
             Items = new ServiceLayerRepository<Items>(slConn);
             VatGroups = new ServiceLayerRepository<VatGroups>(slConn);
             Warehouses = new ServiceLayerRepository<Warehouses>(slConn);
+            CreditNotes = new ServiceLayerRepository<CreditNotes>(slConn);
             StockTransfers = new ServiceLayerRepository<StockTransfers>(slConn);
         }
+
+        [Fact]
+        public async Task CancelAsyncCreditNotes()
+        {
+            await CreditNotes.CancelAsync(6);
+        }
+
 
         [Fact]
         public async Task GetWarehouses()

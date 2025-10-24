@@ -114,9 +114,10 @@ namespace SAPB1.SLFramework.ServiceLayer
         /// </summary>
         public async Task CancelAsync(object id, CancellationToken ct = default)
         {
-            var key = EnsureKeyWrapped(id);
-            await Req($"{_resource}{key}", "Cancel").PostAsync().WaitAsync(ct);
+            var key = EnsureKeyWrapped(id); // e.g., "(6)"
+            await Req($"{_resource}{key}/Cancel").PostAsync().WaitAsync(ct);
         }
+
 
         #endregion
 
