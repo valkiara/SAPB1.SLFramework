@@ -201,8 +201,8 @@ namespace SAPB1.SLFramework.Abstractions.Models
 
         public decimal? PurchaseUnitWeight { get; set; }
         public decimal? PurchaseUnitWeight1 { get; set; }
-        public string? PurchaseWeightUnit { get; set; }
-        public string? PurchaseWeightUnit1 { get; set; }
+        public int? PurchaseWeightUnit { get; set; }
+        public int? PurchaseWeightUnit1 { get; set; }
 
         public decimal? PurchaseUnitVolume { get; set; }
         public int? PurchaseVolumeUnit { get; set; }
