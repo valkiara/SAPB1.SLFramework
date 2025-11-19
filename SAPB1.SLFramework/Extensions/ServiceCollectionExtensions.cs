@@ -1,9 +1,10 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using B1SLayer;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using B1SLayer;
+using Microsoft.Extensions.Options;
 using SAPB1.SLFramework.Abstractions.Interfaces;
-using SAPB1.SLFramework.Metadata.Services;
 using SAPB1.SLFramework.Metadata.Provisioning;
+using SAPB1.SLFramework.Metadata.Services;
 using SAPB1.SLFramework.ServiceLayer;
 using SAPB1.SLFramework.Settings;
 
@@ -35,15 +36,31 @@ namespace SAPB1.SLFramework.Extensions
             // 2. Register SLConnection as singleton using bound settings
             services.AddSingleton(sp =>
             {
-                var opts = sp.GetRequiredService<Microsoft.Extensions.Options.IOptions<SapB1Settings>>().Value;
-                return new SLConnection(
+                var opts = sp.GetRequiredService<IOptions<SapB1Settings>>().Value;
+
+                var conn = new SLConnection(
                     opts.ServiceLayerUrl,
                     opts.CompanyDB,
                     opts.UserName,
                     opts.Password,
                     opts.Language,
                     opts.NumberOfAttempts);
+
+                // --- INJECT HEADERS HERE ---
+                if (opts.ExtraHeaders is not null)
+                {
+                    conn.BeforeCall(call =>
+                    {
+                        foreach (var kv in opts.ExtraHeaders)
+                        {
+                            call.Request.Headers.Add(kv.Key, kv.Value);
+                        }
+                    });
+                }
+
+                return conn;
             });
+
 
             // 3. (Removed) Exposing SLConnection via GetRequiredService<SLConnection>() created a circular loop.
             //    You can inject SLConnection directly in your repositories or provisioner.

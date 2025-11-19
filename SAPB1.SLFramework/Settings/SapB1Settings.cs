@@ -35,5 +35,7 @@
         /// Number of retry attempts for transient Service Layer calls.
         /// </summary>
         public int NumberOfAttempts { get; set; } = 3;
+
+        public Dictionary<string, string>? ExtraHeaders { get; set; }
     }
 }
